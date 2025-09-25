@@ -35,7 +35,7 @@ export const HomeView: React.FC = () => {
   ]);
 
   const popularTags = ["Debate", "Enquete", "Notícias", "Tech", "Política", "Esportes", "Música", "Arte"];
-
+  
   const SearchBar = () => {
     return (
       <div className="sticky top-0 z-10 w-full bg-rixa-dark shadow-sm border-b border-rixa-blue/20 p-2 mb-4">
@@ -78,7 +78,11 @@ export const HomeView: React.FC = () => {
                 <button className="px-3 py-1 bg-rixa-cream text-rixa-dark rounded-lg font-bold text-sm hover:bg-rixa-blue ">
                   Busca avançada
                 </button>
-                <button className="px-3 py-1 bg-rixa-cream text-rixa-dark rounded-lg font-bold text-sm hover:bg-rixa-blue ">
+                <button className="px-3 py-1 bg-rixa-cream text-rixa-dark rounded-lg font-bold text-sm hover:bg-rixa-blue " onClick={()=> {
+                  setPosts(posts.sort((a, b) => {
+                    return (new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+                  }));
+                }}>
                   Filtros
                 </button>
               </div>

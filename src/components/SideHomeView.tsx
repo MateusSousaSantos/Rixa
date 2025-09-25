@@ -52,7 +52,22 @@ export const SideHomeView: React.FC = () => {
               <HiOutlineEmojiHappy size={25} />
             </button>
           </div>
-          <button className="text-rixa-cream/40 hover:text-rixa-cream/60 transition-colors">
+          <button
+            className="text-rixa-cream/40 hover:text-rixa-cream/60 transition-colors"
+            onClick={() => {
+              setPosts([
+                {
+                  id: posts.length + 1,
+                  author: "You",
+                  content: postText,
+                  timestamp: "Just now",
+                  type: "normal",
+                },
+                ...posts,
+              ]);
+              setPostText("");
+            }}
+          >
             <IoSend size={25} />
           </button>
         </div>
