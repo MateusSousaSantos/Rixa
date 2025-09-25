@@ -1,0 +1,12 @@
+// Export all components from this index file for cleaner imports
+export { Header } from './Header'
+export { Post } from './posts/NormalPost'
+export { IconDemo } from './IconDemo'
+export { LoginForm } from './LoginForm'
+export { UserProfile } from './UserProfile'
+export { Navigation } from './Navigation'
+export { HomeView } from './HomeView'
+export { ProfileView } from './ProfileView'
+export { SettingsView } from './SettingsView'
+export { LoginView } from './LoginView'
+export type { NavigationView } from './Navigation'
