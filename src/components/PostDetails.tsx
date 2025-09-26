@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import { Post, type PostProps } from "./posts/NormalPost";
 import { Comment, type CommentData } from "./posts/Comment";
 import { FiArrowLeft } from "react-icons/fi";
 import type { NavigationView, PostDetailsState } from "../types/navigation";
@@ -66,18 +65,7 @@ export const PostDetails: React.FC<PostDetailsProps> = ({
     }
   };
 
-  const handleCommentNavigation = (comment: CommentData) => {
-    if (onCommentClick && comment) {
-      const commentDetails: PostDetailsState = {
-        postId: comment.id || Date.now(),
-        postType: 'normal',
-        author: comment.author || 'Unknown User',
-        content: comment.content || 'No content available',
-        timestamp: comment.timestamp || 'Unknown time',
-      };
-      onCommentClick('post-details', commentDetails);
-    }
-  };
+
 
   return (
     <div className="space-y-6 p-4">

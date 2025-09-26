@@ -152,7 +152,7 @@ export const createPost = async (postData: Omit<PostType, 'id' | 'timestamp'>): 
     ...postData,
     id: Math.max(...mockPosts.map(p => p.id)) + 1,
     timestamp: 'Just now'
-  }
+  } as PostType
   
   mockPosts.unshift(newPost)
   

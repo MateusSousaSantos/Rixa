@@ -1,5 +1,5 @@
 // Base API configuration and utilities
-const API_BASE_URL = import.meta.env.VITE_APP_API_URL || 'http://localhost:3001/api'
+export const API_BASE_URL = import.meta.env.VITE_APP_API_URL || 'http://localhost:3001/api'
 
 // Simulate network delay for realistic testing
 const simulateDelay = (ms: number = 500): Promise<void> => 
@@ -20,13 +20,18 @@ interface ApiResponse<T> {
 
 // Error handling
 export class ApiError extends Error {
+  public status: number
+  public code?: string
+  
   constructor(
     message: string, 
-    public status: number = 500,
-    public code?: string
+    status: number = 500,
+    code?: string
   ) {
     super(message)
     this.name = 'ApiError'
+    this.status = status
+    this.code = code
   }
 }
 
@@ -36,6 +41,8 @@ export const apiRequest = async <T>(
   options: RequestInit = {}
 ): Promise<ApiResponse<T>> => {
   // This will be replaced with actual fetch logic later
+  // Using endpoint and options parameters when implementing real API
+  console.log('API request to:', endpoint, 'with options:', options)
   throw new Error('Real API not implemented yet')
 }
 

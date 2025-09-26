@@ -39,6 +39,9 @@ export const login = async (email: string, password: string): Promise<ApiRespons
   await simulateDelay(800) // Simulate network request
   
   // Mock authentication - any email/password works for demo
+  // In real implementation, password would be validated
+  console.log('Login attempt for:', email, 'with password length:', password.length)
+  
   const user = mockUsers.find(u => u.email === email) || {
     id: Date.now().toString(),
     username: email.split('@')[0],

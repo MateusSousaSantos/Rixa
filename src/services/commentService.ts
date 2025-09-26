@@ -127,6 +127,9 @@ export const likeComment = async (commentId: number): Promise<ApiResponse<boolea
   await simulateDelay(150)
   
   // Mock like functionality - in real app would update like count
+  // Using commentId for future implementation
+  console.log('Liking comment:', commentId)
+  
   return {
     data: true,
     success: true,
