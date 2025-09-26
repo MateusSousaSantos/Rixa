@@ -5,30 +5,30 @@ import { simulateDelay, type ApiResponse } from './api'
 const mockComments: Record<number, CommentData[]> = {
   // Comments for posts
   1: [
-    { id: 101, author: "Bob", content: "Great book recommendation! I'll definitely check it out.", timestamp: "1 hour ago", replyCount: 2 },
-    { id: 102, author: "Charlie", content: "AI ethics is such an important topic right now.", timestamp: "45 min ago", replyCount: 1 },
-    { id: 103, author: "Diana", content: "Which book specifically? I'm always looking for good reads on this topic.", timestamp: "30 min ago", replyCount: 0 }
+    { id: 101, author: "Bob", content: "Ótima recomendação de livro! Com certeza vou dar uma olhada.", timestamp: "1 hora atrás", replyCount: 2 },
+    { id: 102, author: "Charlie", content: "Ética em IA é um tópico tão importante agora.", timestamp: "45 min atrás", replyCount: 1 },
+    { id: 103, author: "Diana", content: "Qual livro especificamente? Sempre procuro boas leituras sobre esse tópico.", timestamp: "30 min atrás", replyCount: 0 }
   ],
   2: [
-    { id: 201, author: "Alice", content: "This is exactly the kind of debate we need!", timestamp: "4 hours ago", replyCount: 3 },
-    { id: 202, author: "Eve", content: "I'm torn on this issue. Both sides have valid points.", timestamp: "3 hours ago", replyCount: 2 }
+    { id: 201, author: "Alice", content: "Esse é exatamente o tipo de debate que precisamos!", timestamp: "4 horas atrás", replyCount: 3 },
+    { id: 202, author: "Eve", content: "Estou dividida nessa questão. Ambos os lados têm pontos válidos.", timestamp: "3 horas atrás", replyCount: 2 }
   ],
   3: [
-    { id: 301, author: "Alice", content: "I vote for sushi! 🍣", timestamp: "20 hours ago", replyCount: 1 },
-    { id: 302, author: "Frank", content: "The Italian place has great reviews.", timestamp: "18 hours ago", replyCount: 0 }
+    { id: 301, author: "Alice", content: "Eu voto no sushi! 🍣", timestamp: "20 horas atrás", replyCount: 1 },
+    { id: 302, author: "Frank", content: "O restaurante italiano tem ótimas avaliações.", timestamp: "18 horas atrás", replyCount: 0 }
   ],
   // Replies to comments
   101: [
-    { id: 1001, author: "Alice", content: "I just ordered it! Thanks for the rec.", timestamp: "30 min ago", parentId: 101, replyCount: 0 },
-    { id: 1002, author: "ReplyUser", content: "The author's perspective is really unique.", timestamp: "25 min ago", parentId: 101, replyCount: 0 }
+    { id: 1001, author: "Alice", content: "Acabei de encomendar! Obrigada pela recomendação.", timestamp: "30 min atrás", parentId: 101, replyCount: 0 },
+    { id: 1002, author: "ReplyUser", content: "A perspectiva do autor é realmente única.", timestamp: "25 min atrás", parentId: 101, replyCount: 0 }
   ],
   102: [
-    { id: 1003, author: "TechExpert", content: "Especially with all the AI developments lately.", timestamp: "20 min ago", parentId: 102, replyCount: 0 }
+    { id: 1003, author: "TechExpert", content: "Especialmente com todos os desenvolvimentos em IA ultimamente.", timestamp: "20 min atrás", parentId: 102, replyCount: 0 }
   ],
   201: [
-    { id: 2001, author: "Bob", content: "Absolutely! More platforms should have these features.", timestamp: "3 hours ago", parentId: 201, replyCount: 0 },
-    { id: 2002, author: "PolicyWonk", content: "The regulatory landscape is changing fast.", timestamp: "2 hours ago", parentId: 201, replyCount: 1 },
-    { id: 2003, author: "Charlie", content: "We need to balance freedom with responsibility.", timestamp: "1 hour ago", parentId: 201, replyCount: 0 }
+    { id: 2001, author: "Bob", content: "Absolutamente! Mais plataformas deveriam ter essas funcionalidades.", timestamp: "3 horas atrás", parentId: 201, replyCount: 0 },
+    { id: 2002, author: "PolicyWonk", content: "O cenário regulatório está mudando rapidamente.", timestamp: "2 horas atrás", parentId: 201, replyCount: 1 },
+    { id: 2003, author: "Charlie", content: "Precisamos equilibrar liberdade com responsabilidade.", timestamp: "1 hora atrás", parentId: 201, replyCount: 0 }
   ]
 }
 
@@ -67,9 +67,9 @@ export const createComment = async (
   
   const newComment: CommentData = {
     id: Date.now(), // Simple ID generation for mock
-    author: "You", // In real app, this would come from auth
+    author: "Você", // In real app, this would come from auth
     content,
-    timestamp: "Just now",
+    timestamp: "Agora mesmo",
     parentId,
     replyCount: 0
   }
@@ -96,7 +96,7 @@ export const createComment = async (
   return {
     data: newComment,
     success: true,
-    message: 'Comment added successfully'
+    message: 'Comentário adicionado com sucesso'
   }
 }
 
@@ -111,7 +111,7 @@ export const deleteComment = async (commentId: number): Promise<ApiResponse<bool
       return {
         data: true,
         success: true,
-        message: 'Comment deleted successfully'
+        message: 'Comentário deletado com sucesso'
       }
     }
   }
@@ -119,7 +119,7 @@ export const deleteComment = async (commentId: number): Promise<ApiResponse<bool
   return {
     data: false,
     success: false,
-    message: 'Comment not found'
+    message: 'Comentário não encontrado'
   }
 }
 
@@ -128,11 +128,11 @@ export const likeComment = async (commentId: number): Promise<ApiResponse<boolea
   
   // Mock like functionality - in real app would update like count
   // Using commentId for future implementation
-  console.log('Liking comment:', commentId)
+  console.log('Curtindo comentário:', commentId)
   
   return {
     data: true,
     success: true,
-    message: 'Comment liked'
+    message: 'Comentário curtido'
   }
 }

@@ -9,7 +9,7 @@ const mockUsers: User[] = [
     email: 'alice@example.com',
     displayName: 'Alice Johnson',
     avatar: '',
-    bio: 'Full-stack developer passionate about AI ethics and clean code.',
+    bio: 'Desenvolvedora full-stack apaixonada por ética em IA e código limpo.',
     createdAt: '2023-01-15T10:30:00Z',
   },
   {
@@ -18,7 +18,7 @@ const mockUsers: User[] = [
     email: 'bob@example.com',
     displayName: 'Bob Smith',
     avatar: '',
-    bio: 'Policy researcher interested in technology regulation.',
+    bio: 'Pesquisador de políticas interessado em regulamentação tecnológica.',
     createdAt: '2023-02-20T14:45:00Z',
   },
   {
@@ -27,7 +27,7 @@ const mockUsers: User[] = [
     email: 'charlie@example.com',
     displayName: 'Charlie Wilson',
     avatar: '',
-    bio: 'Product Manager at TechCorp. Love organizing team events!',
+    bio: 'Product Manager na TechCorp. Amo organizar eventos em equipe!',
     createdAt: '2023-03-10T09:15:00Z',
   }
 ]
@@ -40,7 +40,7 @@ export const login = async (email: string, password: string): Promise<ApiRespons
   
   // Mock authentication - any email/password works for demo
   // In real implementation, password would be validated
-  console.log('Login attempt for:', email, 'with password length:', password.length)
+  console.log('Tentativa de login para:', email, 'com tamanho da senha:', password.length)
   
   const user = mockUsers.find(u => u.email === email) || {
     id: Date.now().toString(),
@@ -48,7 +48,7 @@ export const login = async (email: string, password: string): Promise<ApiRespons
     email,
     displayName: email.split('@')[0].charAt(0).toUpperCase() + email.split('@')[0].slice(1),
     avatar: '',
-    bio: 'Welcome to Rixa!',
+    bio: 'Bem-vindo ao Rixa!',
     createdAt: new Date().toISOString(),
   }
   
@@ -65,7 +65,7 @@ export const login = async (email: string, password: string): Promise<ApiRespons
       token: `mock_token_${user.id}_${Date.now()}`
     },
     success: true,
-    message: 'Login successful'
+    message: 'Login realizado com sucesso'
   }
 }
 
@@ -76,7 +76,7 @@ export const logout = async (): Promise<ApiResponse<boolean>> => {
   return {
     data: true,
     success: true,
-    message: 'Logged out successfully'
+    message: 'Logout realizado com sucesso'
   }
 }
 
@@ -97,7 +97,7 @@ export const updateProfile = async (userId: string, profileData: Partial<User>):
     return {
       data: null as any,
       success: false,
-      message: 'User not found'
+      message: 'Usuário não encontrado'
     }
   }
   
@@ -111,7 +111,7 @@ export const updateProfile = async (userId: string, profileData: Partial<User>):
   return {
     data: updatedUser,
     success: true,
-    message: 'Profile updated successfully'
+    message: 'Perfil atualizado com sucesso'
   }
 }
 
@@ -138,6 +138,6 @@ export const getUserById = async (userId: string): Promise<ApiResponse<User | nu
   return {
     data: user || null,
     success: !!user,
-    message: user ? undefined : 'User not found'
+    message: user ? undefined : 'Usuário não encontrado'
   }
 }

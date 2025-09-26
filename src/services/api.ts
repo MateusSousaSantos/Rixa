@@ -42,8 +42,8 @@ export const apiRequest = async <T>(
 ): Promise<ApiResponse<T>> => {
   // This will be replaced with actual fetch logic later
   // Using endpoint and options parameters when implementing real API
-  console.log('API request to:', endpoint, 'with options:', options)
-  throw new Error('Real API not implemented yet')
+  console.log('Requisição API para:', endpoint, 'com opções:', options)
+  throw new Error('API real ainda não implementada')
 }
 
 export { simulateDelay }

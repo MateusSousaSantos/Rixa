@@ -31,7 +31,7 @@ export const SideHomeView: React.FC<SideHomeViewProps> = ({ onPostClick }) => {
         setPosts(response.data);
       }
     } catch (error) {
-      console.error('Error loading side posts:', error);
+      console.error('Erro ao carregar posts da sidebar:', error);
     } finally {
       setLoading(false);
     }
@@ -60,7 +60,7 @@ export const SideHomeView: React.FC<SideHomeViewProps> = ({ onPostClick }) => {
       setIsPosting(true);
       try {
         const response = await createPost({
-          author: "You", // In real app, this would come from auth context
+          author: "Você", // In real app, this would come from auth context
           content: postText,
           type: "normal"
         });
@@ -70,7 +70,7 @@ export const SideHomeView: React.FC<SideHomeViewProps> = ({ onPostClick }) => {
           setPostText("");
         }
       } catch (error) {
-        console.error('Error creating post:', error);
+        console.error('Erro ao criar post:', error);
       } finally {
         setIsPosting(false);
       }
@@ -146,7 +146,7 @@ export const SideHomeView: React.FC<SideHomeViewProps> = ({ onPostClick }) => {
       <div className="flex-1 overflow-y-auto px-5 space-y-4 scrollbar-thin scrollbar-track-rixa-dark scrollbar-thumb-rixa-blue hover:scrollbar-thumb-rixa-cream scrollbar-thumb-rounded-full scrollbar-track-rounded-full pt-5">
         {loading ? (
           <div className="text-center py-4 text-rixa-cream/60">
-            Loading posts...
+            Carregando posts...
           </div>
         ) : (
           posts.map((post) => (

@@ -41,11 +41,11 @@ export const PostDetails: React.FC<PostDetailsProps> = ({
       if (response.success) {
         setComments(response.data);
       } else {
-        setError('Failed to load comments');
+        setError('Falha ao carregar comentários');
       }
     } catch (err) {
-      setError('Error loading comments');
-      console.error('Error loading comments:', err);
+      setError('Erro ao carregar comentários');
+      console.error('Erro ao carregar comentários:', err);
     } finally {
       setLoading(false);
     }
@@ -61,7 +61,7 @@ export const PostDetails: React.FC<PostDetailsProps> = ({
         setNewComment('');
       }
     } catch (error) {
-      console.error('Error adding comment:', error);
+      console.error('Erro ao adicionar comentário:', error);
     }
   };
 
@@ -76,7 +76,7 @@ export const PostDetails: React.FC<PostDetailsProps> = ({
           className="flex items-center gap-2 text-rixa-blue hover:text-rixa-cream transition-colors mb-4"
         >
           <FiArrowLeft size={16} />
-          <span>Back to Home</span>
+          <span>Voltar ao Início</span>
         </button>
       )}
 
@@ -102,7 +102,7 @@ export const PostDetails: React.FC<PostDetailsProps> = ({
       {/* Add Comment Section */}
       <div className="bg-rixa-dark rounded-lg p-6 border border-rixa-blue/20">
         <h4 className="text-md font-semibold text-rixa-cream mb-3">
-          Add a Comment
+          Adicionar Comentário
         </h4>
         <div className="flex gap-3">
           <textarea
@@ -110,7 +110,7 @@ export const PostDetails: React.FC<PostDetailsProps> = ({
             onChange={(e) => setNewComment(e.target.value)}
             className="flex-1 p-3 bg-rixa-dark-shadow border border-rixa-blue/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-rixa-blue focus:border-rixa-blue text-rixa-cream placeholder-rixa-cream/50 resize-none"
             rows={3}
-            placeholder="Share your thoughts..."
+            placeholder="Compartilhe seus pensamentos..."
           />
           <div className="flex flex-col gap-2">
             <button 
@@ -118,7 +118,7 @@ export const PostDetails: React.FC<PostDetailsProps> = ({
               disabled={!newComment.trim()}
               className="px-4 py-2 bg-rixa-blue text-white rounded-lg hover:bg-rixa-blue/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
-              Post
+              Postar
             </button>
           </div>
         </div>
@@ -127,12 +127,12 @@ export const PostDetails: React.FC<PostDetailsProps> = ({
       {/* Comments Section */}
       <div className="bg-rixa-dark rounded-lg p-6 border border-rixa-blue/20">
         <h3 className="text-lg font-semibold text-rixa-cream mb-4">
-          Comments ({comments.length})
+          Comentários ({comments.length})
         </h3>
         
         {loading ? (
           <div className="text-center py-4 text-rixa-cream/60">
-            Loading comments...
+            Carregando comentários...
           </div>
         ) : error ? (
           <div className="text-center py-4 text-rixa-red">
@@ -157,7 +157,7 @@ export const PostDetails: React.FC<PostDetailsProps> = ({
         
         {!loading && comments.length === 0 && (
           <div className="text-center py-8 text-rixa-cream/60">
-            <p>No comments yet. Be the first to comment!</p>
+            <p>Ainda não há comentários. Seja o primeiro a comentar!</p>
           </div>
         )}
       </div>

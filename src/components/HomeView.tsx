@@ -34,11 +34,11 @@ export const HomeView: React.FC<HomeViewProps> = ({ onPostClick }) => {
       if (response.success) {
         setPosts(response.data);
       } else {
-        setError('Failed to load posts');
+        setError('Falha ao carregar posts');
       }
     } catch (err) {
-      setError('Error loading posts');
-      console.error('Error loading posts:', err);
+      setError('Erro ao carregar posts');
+      console.error('Erro ao carregar posts:', err);
     } finally {
       setLoading(false);
     }
@@ -58,11 +58,11 @@ export const HomeView: React.FC<HomeViewProps> = ({ onPostClick }) => {
       if (response.success) {
         setPosts(response.data);
       } else {
-        setError('Search failed');
+        setError('Falha na busca');
       }
     } catch (err) {
-      setError('Search error');
-      console.error('Search error:', err);
+      setError('Erro na busca');
+      console.error('Erro na busca:', err);
     } finally {
       setLoading(false);
     }
@@ -211,7 +211,7 @@ export const HomeView: React.FC<HomeViewProps> = ({ onPostClick }) => {
       <div className="h-full flex flex-col">
         <SearchBar />
         <div className="flex-1 flex items-center justify-center">
-          <div className="text-rixa-cream">Loading posts...</div>
+          <div className="text-rixa-cream">Carregando posts...</div>
         </div>
       </div>
     );
@@ -239,7 +239,7 @@ export const HomeView: React.FC<HomeViewProps> = ({ onPostClick }) => {
       >
         {posts.length === 0 ? (
           <div className="text-center py-12 text-rixa-cream/60">
-            {searchQuery ? 'No posts found for your search.' : 'No posts available.'}
+            {searchQuery ? 'Nenhum post encontrado para sua busca.' : 'Nenhum post disponível.'}
           </div>
         ) : (
           posts.map((post) => (

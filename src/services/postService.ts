@@ -6,73 +6,73 @@ const mockPosts: PostType[] = [
   {
     id: 1,
     author: "Alice",
-    content: "Just finished reading an amazing book about AI ethics! The intersection of technology and philosophy is fascinating.",
-    timestamp: "2 hours ago",
+    content: "Acabei de terminar de ler um livro incrível sobre ética em IA! A interseção entre tecnologia e filosofia é fascinante.",
+    timestamp: "2 horas atrás",
     type: "normal",
   },
   {
     id: 2,
     author: "Bob",
-    content: "What do you think about the new social media regulations?",
-    timestamp: "5 hours ago",
+    content: "O que vocês acham sobre as novas regulamentações de redes sociais?",
+    timestamp: "5 horas atrás",
     type: "debate",
-    topic: "Social Media Regulations: Necessary Protection or Overreach?",
+    topic: "Regulamentações de Redes Sociais: Proteção Necessária ou Exagero?",
     sides: {
       pro: { 
         votes: 87, 
-        arguments: ["Better privacy protection", "Reduced misinformation", "Protects vulnerable users"], 
-        name: "Necessary Protection" 
+        arguments: ["Melhor proteção da privacidade", "Redução de desinformação", "Protege usuários vulneráveis"], 
+        name: "Proteção Necessária" 
       },
       con: { 
         votes: 63, 
-        arguments: ["Limits free speech", "Government overreach", "Stifles innovation"], 
-        name: "Overreach" 
+        arguments: ["Limita a liberdade de expressão", "Excesso governamental", "Sufoca a inovação"], 
+        name: "Exagero" 
       }
     }
   },
   {
     id: 3,
     author: "Charlie",
-    content: "Where should we go for our next team lunch? Let's decide together!",
-    timestamp: "1 day ago",
+    content: "Para onde devemos ir no próximo almoço da equipe? Vamos decidir juntos!",
+    timestamp: "1 dia atrás",
     type: "pool",
-    question: "Best lunch spot for team meeting?",
+    question: "Melhor lugar para almoçar em equipe?",
     options: [
-      { id: 1, text: "Italian Restaurant Downtown", votes: 23 },
-      { id: 2, text: "Sushi Bar on Main St", votes: 31 },
-      { id: 3, text: "Mexican Grill (Food Truck)", votes: 15 },
-      { id: 4, text: "Healthy Salad Bar", votes: 8 }
+      { id: 1, text: "Restaurante Italiano do Centro", votes: 23 },
+      { id: 2, text: "Sushi Bar da Rua Principal", votes: 31 },
+      { id: 3, text: "Food Truck Mexicano", votes: 15 },
+      { id: 4, text: "Saladeria Saudável", votes: 8 }
     ]
   },
   {
     id: 4,
     author: "Diana",
-    content: "Climate change debate is heating up again. What are your thoughts on the latest policy proposals?",
-    timestamp: "3 hours ago",
+    content: "O debate sobre mudanças climáticas está esquentando novamente. O que vocês acham das últimas propostas de políticas?",
+    timestamp: "3 horas atrás",
     type: "debate",
-    topic: "Climate Policy: Aggressive Action vs Economic Balance",
+    topic: "Política Climática: Ação Agressiva vs Equilíbrio Econômico",
     sides: {
       pro: { 
         votes: 156, 
-        arguments: ["Urgent action needed", "Future generations depend on us", "Economic benefits of green tech"], 
-        name: "Aggressive Action" 
+        arguments: ["Ação urgente é necessária", "Futuras gerações dependem de nós", "Benefícios econômicos da tecnologia verde"], 
+        name: "Ação Agressiva" 
       },
       con: { 
         votes: 98, 
-        arguments: ["Need economic stability", "Gradual transition is better", "Job market concerns"], 
-        name: "Economic Balance" 
+        arguments: ["Precisamos de estabilidade econômica", "Transição gradual é melhor", "Preocupações com o mercado de trabalho"], 
+        name: "Equilíbrio Econômico" 
       }
     }
   },
   {
     id: 5,
     author: "Eve",
-    content: "Which programming framework should we use for our next project?",
-    timestamp: "6 hours ago",
+    content: "Qual framework de programação devemos usar no próximo projeto?",
+    timestamp: "6 horas atrás",
     type: "pool",
-    question: "Best framework for our web project?",
+    question: "Melhor framework para nosso projeto web?",
     options: [
-      { id: 1, text: "React with TypeScript", votes: 45 },
+      { id: 1, text: "React com TypeScript", votes: 45 },
       { id: 2, text: "Vue.js 3", votes: 28 },
       { id: 3, text: "Angular", votes: 19 },
       { id: 4, text: "Svelte", votes: 12 }
@@ -81,8 +81,8 @@ const mockPosts: PostType[] = [
   {
     id: 6,
     author: "Frank",
-    content: "Just had the most amazing coffee at the new café downtown. Their barista really knows their craft!",
-    timestamp: "30 minutes ago",
+    content: "Acabei de tomar o café mais incrível na nova cafeteria do centro. O barista realmente conhece seu ofício!",
+    timestamp: "30 minutos atrás",
     type: "normal",
   }
 ]
@@ -130,7 +130,7 @@ export const fetchPosts = async (
       }
     }
   } catch (error) {
-    throw new Error('Failed to fetch posts')
+    throw new Error('Falha ao buscar posts')
   }
 }
 
@@ -141,7 +141,7 @@ export const fetchPostById = async (id: number): Promise<ApiResponse<PostType | 
   return {
     data: post || null,
     success: !!post,
-    message: post ? undefined : 'Post not found'
+    message: post ? undefined : 'Post não encontrado'
   }
 }
 
@@ -159,7 +159,7 @@ export const createPost = async (postData: Omit<PostType, 'id' | 'timestamp'>): 
   return {
     data: newPost,
     success: true,
-    message: 'Post created successfully'
+    message: 'Post criado com sucesso'
   }
 }
 
@@ -171,7 +171,7 @@ export const deletePost = async (id: number): Promise<ApiResponse<boolean>> => {
     return {
       data: false,
       success: false,
-      message: 'Post not found'
+      message: 'Post não encontrado'
     }
   }
   
@@ -179,7 +179,7 @@ export const deletePost = async (id: number): Promise<ApiResponse<boolean>> => {
   return {
     data: true,
     success: true,
-    message: 'Post deleted successfully'
+    message: 'Post deletado com sucesso'
   }
 }
 
@@ -218,7 +218,7 @@ export const voteInPoll = async (postId: number, optionId: number): Promise<ApiR
     return {
       data: false,
       success: false,
-      message: 'Poll not found'
+      message: 'Enquete não encontrada'
     }
   }
   
@@ -227,7 +227,7 @@ export const voteInPoll = async (postId: number, optionId: number): Promise<ApiR
     return {
       data: false,
       success: false,
-      message: 'Option not found'
+      message: 'Opção não encontrada'
     }
   }
   
@@ -236,7 +236,7 @@ export const voteInPoll = async (postId: number, optionId: number): Promise<ApiR
   return {
     data: true,
     success: true,
-    message: 'Vote recorded successfully'
+    message: 'Voto registrado com sucesso'
   }
 }
 
@@ -248,7 +248,7 @@ export const voteInDebate = async (postId: number, side: 'pro' | 'con'): Promise
     return {
       data: false,
       success: false,
-      message: 'Debate not found'
+      message: 'Debate não encontrado'
     }
   }
   
@@ -259,6 +259,6 @@ export const voteInDebate = async (postId: number, side: 'pro' | 'con'): Promise
   return {
     data: true,
     success: true,
-    message: 'Vote recorded successfully'
+    message: 'Voto registrado com sucesso'
   }
 }

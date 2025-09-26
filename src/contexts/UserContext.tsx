@@ -97,13 +97,13 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
       } else {
         dispatch({ 
           type: 'LOGIN_FAILURE', 
-          payload: response.message || 'Login failed' 
+          payload: response.message || 'Falha no login' 
         })
       }
     } catch (error) {
       dispatch({ 
         type: 'LOGIN_FAILURE', 
-        payload: error instanceof Error ? error.message : 'Login failed' 
+        payload: error instanceof Error ? error.message : 'Falha no login' 
       })
     }
   }
