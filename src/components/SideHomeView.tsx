@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Post } from "./posts/NormalPost";
 import type { PostType } from "../components/posts/index";
 import type { NavigationView, PostDetailsState } from "../types/navigation";
@@ -6,8 +6,7 @@ import { HiOutlineEmojiHappy } from "react-icons/hi";
 import { FaPoll } from "react-icons/fa";
 import { RiImage2Fill } from "react-icons/ri";
 import { IoSend, IoLink } from "react-icons/io5";
-import { useAuth } from "../hooks";
-import { createPost, fetchPosts } from "../services/postService";
+import { useAuth, usePosts, useCreatePost } from "../hooks";
 
 interface SideHomeViewProps {
   onPostClick?: (view: NavigationView, postDetails?: PostDetailsState) => void;
@@ -15,27 +14,12 @@ interface SideHomeViewProps {
 
 export const SideHomeView: React.FC<SideHomeViewProps> = ({ onPostClick }) => {
   const { isAuthenticated } = useAuth();
-  const [posts, setPosts] = useState<PostType[]>([]);
-  const [loading, setLoading] = useState(false);
 
-  // Load posts on component mount
-  useEffect(() => {
-    loadSidePosts();
-  }, []);
+  // Use React Query for posts
+  const { data: posts = [], isLoading: loading } = usePosts(1, 5, "newest"); // Load fewer posts for sidebar
 
-  const loadSidePosts = async () => {
-    setLoading(true);
-    try {
-      const response = await fetchPosts(1, 5, 'newest'); // Load fewer posts for sidebar
-      if (response.success) {
-        setPosts(response.data);
-      }
-    } catch (error) {
-      console.error('Erro ao carregar posts da sidebar:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  // Use React Query for creating posts
+  const createPostMutation = useCreatePost();
 
   const handleCommentClick = (post: PostType) => {
     if (onPostClick) {
@@ -46,7 +30,7 @@ export const SideHomeView: React.FC<SideHomeViewProps> = ({ onPostClick }) => {
         content: post.content,
         timestamp: post.timestamp,
       };
-      onPostClick('post-details', postDetails);
+      onPostClick("post-details", postDetails);
     }
   };
 
@@ -59,18 +43,15 @@ export const SideHomeView: React.FC<SideHomeViewProps> = ({ onPostClick }) => {
 
       setIsPosting(true);
       try {
-        const response = await createPost({
+        await createPostMutation.mutateAsync({
           author: "Você", // In real app, this would come from auth context
           content: postText,
-          type: "normal"
+          type: "normal",
         });
 
-        if (response.success) {
-          setPosts([response.data, ...posts]);
-          setPostText("");
-        }
+        setPostText("");
       } catch (error) {
-        console.error('Erro ao criar post:', error);
+        console.error("Erro ao criar post:", error);
       } finally {
         setIsPosting(false);
       }
@@ -112,7 +93,7 @@ export const SideHomeView: React.FC<SideHomeViewProps> = ({ onPostClick }) => {
           </div>
           <button
             className={`text-rixa-cream/40 hover:text-rixa-cream/60 transition-colors ${
-              isPosting ? 'opacity-50 cursor-not-allowed' : ''
+              isPosting ? "opacity-50 cursor-not-allowed" : ""
             }`}
             onClick={handleCreatePost}
             disabled={isPosting || !postText.trim()}
@@ -149,11 +130,10 @@ export const SideHomeView: React.FC<SideHomeViewProps> = ({ onPostClick }) => {
             Carregando posts...
           </div>
         ) : (
-          posts.map((post) => (
-            <RenderPost key={post.id} post={post} />
-          ))
+          posts.map((post) => <RenderPost key={post.id} post={post} />)
         )}
       </div>
+      
       {isAuthenticated && <PostBox />}
     </div>
   );

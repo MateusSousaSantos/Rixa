@@ -5,7 +5,7 @@ import { PoolPost } from "./posts/PoolPost";
 import type { PostType } from "../components/posts/index";
 import type { NavigationView, PostDetailsState } from "../types/navigation";
 import { FaSearch } from "react-icons/fa";
-import { fetchPosts, searchPosts } from "../services/postService";
+import { usePosts, useSearchPosts } from "../hooks";
 
 interface HomeViewProps {
   onPostClick?: (view: NavigationView, postDetails?: PostDetailsState) => void;
@@ -13,59 +13,32 @@ interface HomeViewProps {
 
 export const HomeView: React.FC<HomeViewProps> = ({ onPostClick }) => {
   const [searchFocused, setSearchFocused] = useState(false);
-  const [posts, setPosts] = useState<PostType[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState<'newest' | 'popular' | 'trending'>('newest');
   const searchBarRef = useRef<HTMLDivElement>(null);
 
-  // Load initial posts
-  useEffect(() => {
-    loadPosts();
-  }, [sortBy]);
+  // Use React Query for posts
+  const { 
+    data: posts = [], 
+    isLoading: loadingPosts, 
+    error: postsError 
+  } = usePosts(1, 10, sortBy);
 
-  const loadPosts = async () => {
-    setLoading(true);
-    setError(null);
-    
-    try {
-      const response = await fetchPosts(1, 10, sortBy);
-      if (response.success) {
-        setPosts(response.data);
-      } else {
-        setError('Falha ao carregar posts');
-      }
-    } catch (err) {
-      setError('Erro ao carregar posts');
-      console.error('Erro ao carregar posts:', err);
-    } finally {
-      setLoading(false);
-    }
-  };
+  // Use React Query for search
+  const { 
+    data: searchResults = [], 
+    isLoading: loadingSearch, 
+    error: searchError 
+  } = useSearchPosts(searchQuery, searchQuery.trim().length > 0);
 
-  const handleSearch = async (query: string) => {
-    if (!query.trim()) {
-      loadPosts();
-      return;
-    }
+  // Determine which data to use
+  const displayPosts = searchQuery.trim().length > 0 ? searchResults : posts;
+  const loading = searchQuery.trim().length > 0 ? loadingSearch : loadingPosts;
+  const error = searchQuery.trim().length > 0 ? searchError : postsError;
 
-    setLoading(true);
-    setError(null);
-
-    try {
-      const response = await searchPosts(query);
-      if (response.success) {
-        setPosts(response.data);
-      } else {
-        setError('Falha na busca');
-      }
-    } catch (err) {
-      setError('Erro na busca');
-      console.error('Erro na busca:', err);
-    } finally {
-      setLoading(false);
-    }
+  const handleSearch = (query: string) => {
+    setSearchQuery(query);
+    // React Query will automatically handle the search when searchQuery changes
   };
 
   // Handle click outside to close search
@@ -110,7 +83,6 @@ export const HomeView: React.FC<HomeViewProps> = ({ onPostClick }) => {
               placeholder="Pesquisar"
               value={searchQuery}
               onChange={(e) => {
-                setSearchQuery(e.target.value);
                 handleSearch(e.target.value);
               }}
               onFocus={() => setSearchFocused(true)}
@@ -222,7 +194,7 @@ export const HomeView: React.FC<HomeViewProps> = ({ onPostClick }) => {
       <div className="h-full flex flex-col">
         <SearchBar />
         <div className="flex-1 flex items-center justify-center">
-          <div className="text-rixa-red">{error}</div>
+          <div className="text-rixa-red">{error?.message || 'Erro ao carregar dados'}</div>
         </div>
       </div>
     );
@@ -237,12 +209,12 @@ export const HomeView: React.FC<HomeViewProps> = ({ onPostClick }) => {
                    scrollbar-thumb-rixa-blue hover:scrollbar-thumb-rixa-cream
                    scrollbar-thumb-rounded-full scrollbar-track-rounded-full"
       >
-        {posts.length === 0 ? (
+        {displayPosts.length === 0 ? (
           <div className="text-center py-12 text-rixa-cream/60">
             {searchQuery ? 'Nenhum post encontrado para sua busca.' : 'Nenhum post disponível.'}
           </div>
         ) : (
-          posts.map((post) => (
+          displayPosts.map((post) => (
             <RenderPost key={post.id} post={post} />
           ))
         )}

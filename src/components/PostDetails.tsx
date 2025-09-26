@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from "react";
-import { Comment, type CommentData } from "./posts/Comment";
+import React, { useState } from "react";
+import { Comment } from "./posts/Comment";
 import { FiArrowLeft } from "react-icons/fi";
 import type { NavigationView, PostDetailsState } from "../types/navigation";
-import { fetchComments, createComment } from "../services/commentService";
+import { useComments, useCreateComment } from "../hooks";
 
 interface PostDetailsProps {
   author?: string;
@@ -24,42 +24,26 @@ export const PostDetails: React.FC<PostDetailsProps> = ({
   onCommentClick,
 }) => {
   const [newComment, setNewComment] = useState('');
-  const [comments, setComments] = useState<CommentData[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    loadComments();
-  }, [postId]);
+  // Use React Query for comments
+  const { 
+    data: comments = [], 
+    isLoading: loading, 
+    error 
+  } = useComments(postId);
 
-  const loadComments = async () => {
-    setLoading(true);
-    setError(null);
-    
-    try {
-      const response = await fetchComments(postId);
-      if (response.success) {
-        setComments(response.data);
-      } else {
-        setError('Falha ao carregar comentários');
-      }
-    } catch (err) {
-      setError('Erro ao carregar comentários');
-      console.error('Erro ao carregar comentários:', err);
-    } finally {
-      setLoading(false);
-    }
-  };
+  // Use React Query for creating comments
+  const createCommentMutation = useCreateComment();
 
   const handleAddComment = async () => {
     if (!newComment.trim()) return;
 
     try {
-      const response = await createComment(postId, newComment);
-      if (response.success) {
-        setComments([response.data, ...comments]);
-        setNewComment('');
-      }
+      await createCommentMutation.mutateAsync({
+        postId,
+        content: newComment
+      });
+      setNewComment('');
     } catch (error) {
       console.error('Erro ao adicionar comentário:', error);
     }
@@ -136,7 +120,7 @@ export const PostDetails: React.FC<PostDetailsProps> = ({
           </div>
         ) : error ? (
           <div className="text-center py-4 text-rixa-red">
-            {error}
+            {error?.message || 'Erro ao carregar comentários'}
           </div>
         ) : (
           <div className="space-y-0">
