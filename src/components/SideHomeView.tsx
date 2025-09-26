@@ -1,26 +1,84 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Post } from "./posts/NormalPost";
 import type { PostType } from "../components/posts/index";
+import type { NavigationView, PostDetailsState } from "../types/navigation";
 import { HiOutlineEmojiHappy } from "react-icons/hi";
 import { FaPoll } from "react-icons/fa";
 import { RiImage2Fill } from "react-icons/ri";
 import { IoSend, IoLink } from "react-icons/io5";
-export const SideHomeView: React.FC = () => {
-  const [posts, setPosts] = useState<PostType[]>([
-    {
-      id: 1,
-      author: "Bob",
-      content: "What do you think about the new social media regulations?",
-      timestamp: "5 hours ago",
-      type: "normal",
-    },
-  ]);
+import { useAuth } from "../hooks";
+import { createPost, fetchPosts } from "../services/postService";
+
+interface SideHomeViewProps {
+  onPostClick?: (view: NavigationView, postDetails?: PostDetailsState) => void;
+}
+
+export const SideHomeView: React.FC<SideHomeViewProps> = ({ onPostClick }) => {
+  const { isAuthenticated } = useAuth();
+  const [posts, setPosts] = useState<PostType[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  // Load posts on component mount
+  useEffect(() => {
+    loadSidePosts();
+  }, []);
+
+  const loadSidePosts = async () => {
+    setLoading(true);
+    try {
+      const response = await fetchPosts(1, 5, 'newest'); // Load fewer posts for sidebar
+      if (response.success) {
+        setPosts(response.data);
+      }
+    } catch (error) {
+      console.error('Error loading side posts:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCommentClick = (post: PostType) => {
+    if (onPostClick) {
+      const postDetails: PostDetailsState = {
+        postId: post.id,
+        postType: post.type,
+        author: post.author,
+        content: post.content,
+        timestamp: post.timestamp,
+      };
+      onPostClick('post-details', postDetails);
+    }
+  };
 
   const PostBox = () => {
     const [postText, setPostText] = useState("");
+    const [isPosting, setIsPosting] = useState(false);
+
+    const handleCreatePost = async () => {
+      if (!postText.trim() || isPosting) return;
+
+      setIsPosting(true);
+      try {
+        const response = await createPost({
+          author: "You", // In real app, this would come from auth context
+          content: postText,
+          type: "normal"
+        });
+
+        if (response.success) {
+          setPosts([response.data, ...posts]);
+          setPostText("");
+        }
+      } catch (error) {
+        console.error('Error creating post:', error);
+      } finally {
+        setIsPosting(false);
+      }
+    };
+
     return (
-      <div className="w-full bg-rixa-dark shadow-sm border-b border-rixa-blue/20 p-2  min-h-[8rem] flex flex-col justify-between">
-        <div className="h-full w-full flex justify-normal items-center ">
+      <div className="w-full bg-rixa-dark shadow-sm border-b border-rixa-blue/20 p-2 min-h-[8rem] flex flex-col justify-between">
+        <div className="h-full w-full flex justify-normal items-center">
           <div className="w-full bg-rixa-dark-shadow rounded-lg flex items-center space-x-2 px-4 py-1">
             <textarea
               value={postText}
@@ -53,20 +111,11 @@ export const SideHomeView: React.FC = () => {
             </button>
           </div>
           <button
-            className="text-rixa-cream/40 hover:text-rixa-cream/60 transition-colors"
-            onClick={() => {
-              setPosts([
-                {
-                  id: posts.length + 1,
-                  author: "You",
-                  content: postText,
-                  timestamp: "Just now",
-                  type: "normal",
-                },
-                ...posts,
-              ]);
-              setPostText("");
-            }}
+            className={`text-rixa-cream/40 hover:text-rixa-cream/60 transition-colors ${
+              isPosting ? 'opacity-50 cursor-not-allowed' : ''
+            }`}
+            onClick={handleCreatePost}
+            disabled={isPosting || !postText.trim()}
           >
             <IoSend size={25} />
           </button>
@@ -84,6 +133,7 @@ export const SideHomeView: React.FC = () => {
             author={post.author}
             content={post.content}
             timestamp={post.timestamp}
+            onCommentClick={() => handleCommentClick(post)}
           />
         );
       default:
@@ -93,18 +143,18 @@ export const SideHomeView: React.FC = () => {
 
   return (
     <div className="h-full flex flex-col">
-      <div
-        className="flex-1 overflow-y-auto px-5 space-y-4 
-        scrollbar-thin scrollbar-track-rixa-dark 
-                   scrollbar-thumb-rixa-blue hover:scrollbar-thumb-rixa-cream
-                   scrollbar-thumb-rounded-full scrollbar-track-rounded-full
-                   pt-5"
-      >
-        {posts.map((post) => (
-          <RenderPost key={post.id} post={post} />
-        ))}
+      <div className="flex-1 overflow-y-auto px-5 space-y-4 scrollbar-thin scrollbar-track-rixa-dark scrollbar-thumb-rixa-blue hover:scrollbar-thumb-rixa-cream scrollbar-thumb-rounded-full scrollbar-track-rounded-full pt-5">
+        {loading ? (
+          <div className="text-center py-4 text-rixa-cream/60">
+            Loading posts...
+          </div>
+        ) : (
+          posts.map((post) => (
+            <RenderPost key={post.id} post={post} />
+          ))
+        )}
       </div>
-      <PostBox />
+      {isAuthenticated && <PostBox />}
     </div>
   );
 };

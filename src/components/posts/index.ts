@@ -30,3 +30,7 @@ export interface PoolPost extends BasePost {
 }
 
 export type PostType = NormalPost | DebatePost | PoolPost;
+
+// Export comment types
+export type { CommentData } from './Comment';
+export { Comment } from './Comment';

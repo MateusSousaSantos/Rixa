@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useReducer, useEffect } from 'react'
 import type { User, AuthState } from '../types/user'
+import * as userService from '../services/userService'
 
 // Action types
 type UserAction =
@@ -13,8 +14,8 @@ type UserAction =
 // Context type
 interface UserContextType extends AuthState {
   login: (email: string, password: string) => Promise<void>
-  logout: () => void
-  updateUser: (userData: Partial<User>) => void
+  logout: () => Promise<void>
+  updateUser: (userData: Partial<User>) => Promise<void>
   clearError: () => void
 }
 
@@ -80,29 +81,25 @@ const UserContext = createContext<UserContextType | undefined>(undefined)
 export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [state, dispatch] = useReducer(userReducer, initialState)
 
-  // Mock login function - replace with actual API call
-  const login = async (email: string, _password: string): Promise<void> => {
+  // Updated login function using service
+  const login = async (email: string, password: string): Promise<void> => {
     dispatch({ type: 'LOGIN_START' })
     
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000))
+      const response = await userService.login(email, password)
       
-      // Mock user data - replace with actual API response
-      const mockUser: User = {
-        id: '1',
-        username: 'johndoe',
-        email: email,
-        displayName: 'John Doe',
-        avatar: '',
-        bio: 'Welcome to Rixa!',
-        createdAt: new Date().toISOString(),
+      if (response.success) {
+        // Store token and user in localStorage for persistence
+        localStorage.setItem('rixa_token', response.data.token)
+        localStorage.setItem('rixa_user', JSON.stringify(response.data.user))
+        
+        dispatch({ type: 'LOGIN_SUCCESS', payload: response.data.user })
+      } else {
+        dispatch({ 
+          type: 'LOGIN_FAILURE', 
+          payload: response.message || 'Login failed' 
+        })
       }
-      
-      // Store in localStorage for persistence
-      localStorage.setItem('rixa_user', JSON.stringify(mockUser))
-      
-      dispatch({ type: 'LOGIN_SUCCESS', payload: mockUser })
     } catch (error) {
       dispatch({ 
         type: 'LOGIN_FAILURE', 
@@ -111,18 +108,32 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }
 
-  const logout = (): void => {
-    localStorage.removeItem('rixa_user')
-    dispatch({ type: 'LOGOUT' })
+  const logout = async (): Promise<void> => {
+    try {
+      await userService.logout()
+    } catch (error) {
+      console.error('Logout error:', error)
+    } finally {
+      localStorage.removeItem('rixa_token')
+      localStorage.removeItem('rixa_user')
+      dispatch({ type: 'LOGOUT' })
+    }
   }
 
-  const updateUser = (userData: Partial<User>): void => {
-    dispatch({ type: 'UPDATE_USER', payload: userData })
+  const updateUser = async (userData: Partial<User>): Promise<void> => {
+    if (!state.user) return
     
-    // Update localStorage
-    if (state.user) {
-      const updatedUser = { ...state.user, ...userData }
-      localStorage.setItem('rixa_user', JSON.stringify(updatedUser))
+    try {
+      const response = await userService.updateProfile(state.user.id, userData)
+      
+      if (response.success) {
+        dispatch({ type: 'UPDATE_USER', payload: userData })
+        
+        // Update localStorage
+        localStorage.setItem('rixa_user', JSON.stringify(response.data))
+      }
+    } catch (error) {
+      console.error('Update user error:', error)
     }
   }
 

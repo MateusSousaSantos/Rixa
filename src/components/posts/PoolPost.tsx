@@ -11,6 +11,7 @@ interface PoolPostProps {
     text: string;
     votes: number;
   }>
+  onCommentClick?: () => void
 }
 
 export const PoolPost: React.FC<PoolPostProps> = ({ 
@@ -18,7 +19,8 @@ export const PoolPost: React.FC<PoolPostProps> = ({
   content, 
   timestamp, 
   question, 
-  options 
+  options,
+  onCommentClick
 }) => {
   const [selectedOption, setSelectedOption] = useState<number | null>(null)
   const [hasVoted, setHasVoted] = useState(false)
@@ -117,7 +119,10 @@ export const PoolPost: React.FC<PoolPostProps> = ({
             <FiHeart size={16} />
             <span>Like</span>
           </button>
-          <button className="flex items-center gap-2 text-sm text-rixa-cream/60 hover:text-rixa-blue transition-colors">
+          <button 
+            className="flex items-center gap-2 text-sm text-rixa-cream/60 hover:text-rixa-blue transition-colors"
+            onClick={onCommentClick}
+          >
             <FiMessageCircle size={16} />
             <span>Comment</span>
           </button>

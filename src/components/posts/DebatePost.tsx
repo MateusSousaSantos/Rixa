@@ -6,11 +6,9 @@ import {
   FiMoreHorizontal,
   FiUsers,
 } from "react-icons/fi";
+import type { PostProps } from "./NormalPost";
 
-interface DebatePostProps {
-  author: string;
-  content: string;
-  timestamp: string;
+interface DebatePostProps extends PostProps {
   topic: string;
   sides: {
     pro: { votes: number; arguments: string[]; name?: string };
@@ -24,6 +22,7 @@ export const DebatePost: React.FC<DebatePostProps> = ({
   timestamp,
   topic,
   sides,
+  onCommentClick,
 }) => {
   const [isHovering, setIsHovering] = useState(false);
 
@@ -58,10 +57,10 @@ export const DebatePost: React.FC<DebatePostProps> = ({
       <p className="text-rixa-cream/90 mb-3">{content}</p>
 
       {/* Debate Topic */}
-      <div className="bg-rixa-dark-shadow  mb-4 h-64 flex flex-col justify-between rounded-lg overflow-hidden">
+      <div className="bg-rixa-dark-shadow mb-4 h-64 flex flex-col justify-between rounded-lg overflow-hidden">
         {/* Progress Bar */}
         <div
-          className="w-full bg-rixa-blue/20 h-8  flex overflow-hidden cursor-pointer"
+          className="w-full bg-rixa-blue/20 h-8 flex overflow-hidden cursor-pointer"
           onMouseEnter={() => setIsHovering(true)}
           onMouseLeave={() => setIsHovering(false)}
         >
@@ -109,7 +108,10 @@ export const DebatePost: React.FC<DebatePostProps> = ({
             <FiHeart size={16} />
             <span>Like</span>
           </button>
-          <button className="flex items-center gap-2 text-sm text-rixa-cream/60 hover:text-rixa-blue transition-colors">
+          <button 
+            className="flex items-center gap-2 text-sm text-rixa-cream/60 hover:text-rixa-blue transition-colors"
+            onClick={onCommentClick}
+          >
             <FiMessageCircle size={16} />
             <span>Comment</span>
           </button>
