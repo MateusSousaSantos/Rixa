@@ -3,6 +3,10 @@ export * from './api'
 export * from './postService'
 export * from './commentService'
 export * from './userService'
+export * from './fileService'
+export * from './contentService'
+export * from './notificationService'
+export * from './settingsService'
 
 // Service configuration
 export const serviceConfig = {

@@ -204,3 +204,175 @@ export const getRecommendedUsers = async (limit: number = 5): Promise<ApiRespons
     message: 'Usuários recomendados carregados'
   }
 }
+
+// Follow System Services
+const userFollows: Record<string, string[]> = {} // userId -> array of followedUserIds
+
+export const followUser = async (userId: string): Promise<ApiResponse<boolean>> => {
+  await simulateDelay(200)
+  
+  if (!currentUser) {
+    return {
+      data: false,
+      success: false,
+      message: 'Usuário não autenticado'
+    }
+  }
+  
+  const targetUser = mockUsers.find(u => u.id === userId)
+  if (!targetUser) {
+    return {
+      data: false,
+      success: false,
+      message: 'Usuário não encontrado'
+    }
+  }
+  
+  if (!userFollows[currentUser.id]) {
+    userFollows[currentUser.id] = []
+  }
+  
+  if (userFollows[currentUser.id].includes(userId)) {
+    return {
+      data: false,
+      success: false,
+      message: 'Usuário já está sendo seguido'
+    }
+  }
+  
+  userFollows[currentUser.id].push(userId)
+  
+  return {
+    data: true,
+    success: true,
+    message: 'Usuário seguido com sucesso'
+  }
+}
+
+export const unfollowUser = async (userId: string): Promise<ApiResponse<boolean>> => {
+  await simulateDelay(200)
+  
+  if (!currentUser) {
+    return {
+      data: false,
+      success: false,
+      message: 'Usuário não autenticado'
+    }
+  }
+  
+  if (!userFollows[currentUser.id]) {
+    userFollows[currentUser.id] = []
+  }
+  
+  const followIndex = userFollows[currentUser.id].indexOf(userId)
+  if (followIndex === -1) {
+    return {
+      data: false,
+      success: false,
+      message: 'Usuário não está sendo seguido'
+    }
+  }
+  
+  userFollows[currentUser.id].splice(followIndex, 1)
+  
+  return {
+    data: true,
+    success: true,
+    message: 'Usuário deixou de ser seguido'
+  }
+}
+
+export const getUserFollowers = async (userId: string): Promise<ApiResponse<User[]>> => {
+  await simulateDelay(250)
+  
+  const followers: User[] = []
+  
+  // Find all users who follow the given userId
+  for (const [followerId, followingList] of Object.entries(userFollows)) {
+    if (followingList.includes(userId)) {
+      const followerUser = mockUsers.find(u => u.id === followerId)
+      if (followerUser) {
+        followers.push(followerUser)
+      }
+    }
+  }
+  
+  return {
+    data: followers,
+    success: true,
+    message: 'Seguidores carregados com sucesso'
+  }
+}
+
+export const getUserFollowing = async (userId: string): Promise<ApiResponse<User[]>> => {
+  await simulateDelay(250)
+  
+  const followingIds = userFollows[userId] || []
+  const following = mockUsers.filter(user => followingIds.includes(user.id))
+  
+  return {
+    data: following,
+    success: true,
+    message: 'Usuários seguidos carregados com sucesso'
+  }
+}
+
+export const isFollowingUser = async (userId: string): Promise<ApiResponse<boolean>> => {
+  await simulateDelay(100)
+  
+  if (!currentUser) {
+    return {
+      data: false,
+      success: true
+    }
+  }
+  
+  const isFollowing = userFollows[currentUser.id]?.includes(userId) || false
+  
+  return {
+    data: isFollowing,
+    success: true
+  }
+}
+
+// User Registration Services
+export const signup = async (userData: {
+  username: string
+  email: string
+  password: string
+  displayName: string
+}): Promise<ApiResponse<{ user: User; token: string }>> => {
+  await simulateDelay(600)
+  
+  // Check if user already exists
+  const existingUser = mockUsers.find(u => u.email === userData.email || u.username === userData.username)
+  if (existingUser) {
+    return {
+      data: null as any,
+      success: false,
+      message: 'Email ou nome de usuário já existe'
+    }
+  }
+  
+  const newUser: User = {
+    id: Date.now().toString(),
+    username: userData.username,
+    email: userData.email,
+    displayName: userData.displayName,
+    avatar: '',
+    bio: 'Novo usuário no Rixa!',
+    createdAt: new Date().toISOString(),
+  }
+  
+  mockUsers.push(newUser)
+  currentUser = newUser
+  
+  return {
+    data: {
+      user: newUser,
+      token: `mock_token_${newUser.id}_${Date.now()}`
+    },
+    success: true,
+    message: 'Conta criada com sucesso'
+  }
+}

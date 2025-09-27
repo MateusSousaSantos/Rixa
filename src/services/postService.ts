@@ -258,3 +258,78 @@ export const voteInDebate = async (postId: number, side: 'pro' | 'con'): Promise
     message: 'Voto registrado com sucesso'
   }
 }
+
+// Post Interaction Services
+export const likePost = async (postId: number): Promise<ApiResponse<{ liked: boolean; likeCount: number }>> => {
+  await simulateDelay(150)
+  
+  const post = mockPosts.find(p => p.id === postId)
+  if (!post) {
+    return {
+      data: { liked: false, likeCount: 0 },
+      success: false,
+      message: 'Post não encontrado'
+    }
+  }
+  
+  // Mock like functionality - toggle like status
+  const currentLikes = (post as any).likes || 0
+  const isLiked = (post as any).isLiked || false
+  
+  ;(post as any).likes = isLiked ? currentLikes - 1 : currentLikes + 1
+  ;(post as any).isLiked = !isLiked
+  
+  return {
+    data: {
+      liked: (post as any).isLiked,
+      likeCount: (post as any).likes
+    },
+    success: true,
+    message: (post as any).isLiked ? 'Post curtido' : 'Curtida removida'
+  }
+}
+
+export const sharePost = async (postId: number): Promise<ApiResponse<boolean>> => {
+  await simulateDelay(200)
+  
+  const post = mockPosts.find(p => p.id === postId)
+  if (!post) {
+    return {
+      data: false,
+      success: false,
+      message: 'Post não encontrado'
+    }
+  }
+  
+  // Mock share functionality
+  const currentShares = (post as any).shares || 0
+  ;(post as any).shares = currentShares + 1
+  
+  return {
+    data: true,
+    success: true,
+    message: 'Post compartilhado com sucesso'
+  }
+}
+
+export const reportPost = async (postId: number, reason: string): Promise<ApiResponse<boolean>> => {
+  await simulateDelay(300)
+  
+  const post = mockPosts.find(p => p.id === postId)
+  if (!post) {
+    return {
+      data: false,
+      success: false,
+      message: 'Post não encontrado'
+    }
+  }
+  
+  // Mock report functionality
+  console.log(`Post ${postId} reportado por: ${reason}`)
+  
+  return {
+    data: true,
+    success: true,
+    message: 'Post reportado com sucesso'
+  }
+}

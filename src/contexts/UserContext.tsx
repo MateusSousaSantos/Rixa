@@ -14,6 +14,7 @@ type UserAction =
 // Context type
 interface UserContextType extends AuthState {
   login: (email: string, password: string) => Promise<void>
+  signup: (userData: { username: string; email: string; password: string; displayName: string }) => Promise<void>
   logout: () => Promise<void>
   updateUser: (userData: Partial<User>) => Promise<void>
   clearError: () => void
@@ -137,6 +138,32 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }
 
+  const signup = async (userData: { username: string; email: string; password: string; displayName: string }): Promise<void> => {
+    dispatch({ type: 'LOGIN_START' })
+    
+    try {
+      const response = await userService.signup(userData)
+      
+      if (response.success) {
+        // Store token and user in localStorage for persistence
+        localStorage.setItem('rixa_token', response.data.token)
+        localStorage.setItem('rixa_user', JSON.stringify(response.data.user))
+        
+        dispatch({ type: 'LOGIN_SUCCESS', payload: response.data.user })
+      } else {
+        dispatch({ 
+          type: 'LOGIN_FAILURE', 
+          payload: response.message || 'Falha no registro' 
+        })
+      }
+    } catch (error) {
+      dispatch({ 
+        type: 'LOGIN_FAILURE', 
+        payload: error instanceof Error ? error.message : 'Falha no registro' 
+      })
+    }
+  }
+
   const clearError = (): void => {
     dispatch({ type: 'CLEAR_ERROR' })
   }
@@ -157,6 +184,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const contextValue: UserContextType = {
     ...state,
     login,
+    signup,
     logout,
     updateUser,
     clearError,
