@@ -29,6 +29,42 @@ const mockUsers: User[] = [
     avatar: '',
     bio: 'Product Manager na TechCorp. Amo organizar eventos em equipe!',
     createdAt: '2023-03-10T09:15:00Z',
+  },
+  {
+    id: '4',
+    username: 'diana_designer',
+    email: 'diana@example.com',
+    displayName: 'Diana Costa',
+    avatar: '',
+    bio: 'UX/UI Designer focada em acessibilidade e experiências inclusivas.',
+    createdAt: '2023-04-05T16:20:00Z',
+  },
+  {
+    id: '5',
+    username: 'eduardo_data',
+    email: 'eduardo@example.com',
+    displayName: 'Eduardo Silva',
+    avatar: '',
+    bio: 'Cientista de dados explorando machine learning e análise preditiva.',
+    createdAt: '2023-05-12T11:35:00Z',
+  },
+  {
+    id: '6',
+    username: 'fernanda_security',
+    email: 'fernanda@example.com',
+    displayName: 'Fernanda Santos',
+    avatar: '',
+    bio: 'Especialista em cybersecurity e proteção de dados pessoais.',
+    createdAt: '2023-06-18T13:40:00Z',
+  },
+  {
+    id: '7',
+    username: 'gabriel_startup',
+    email: 'gabriel@example.com',
+    displayName: 'Gabriel Lima',
+    avatar: '',
+    bio: 'Empreendedor tech interessado em inovação e sustentabilidade.',
+    createdAt: '2023-07-25T08:15:00Z',
   }
 ]
 
@@ -139,5 +175,32 @@ export const getUserById = async (userId: string): Promise<ApiResponse<User | nu
     data: user || null,
     success: !!user,
     message: user ? undefined : 'Usuário não encontrado'
+  }
+}
+
+export const getRecommendedUsers = async (limit: number = 5): Promise<ApiResponse<User[]>> => {
+  await simulateDelay(300)
+  
+  // If no current user, return some default recommendations
+  if (!currentUser) {
+    const recommendations = mockUsers.slice(0, limit)
+    return {
+      data: recommendations,
+      success: true,
+      message: 'Usuários recomendados carregados'
+    }
+  }
+  
+  // Filter out the current user and return random recommendations
+  const availableUsers = mockUsers.filter(u => u.id !== currentUser!.id)
+  
+  // Shuffle and limit the results
+  const shuffled = availableUsers.sort(() => 0.5 - Math.random())
+  const recommendations = shuffled.slice(0, limit)
+  
+  return {
+    data: recommendations,
+    success: true,
+    message: 'Usuários recomendados carregados'
   }
 }

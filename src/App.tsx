@@ -20,13 +20,21 @@ import { SideProfileView } from "./components/Profile/SideProfileView";
 
 // Constants for localStorage keys
 const STORAGE_KEYS = {
-  CURRENT_VIEW: 'rixa_current_view',
-  POST_DETAILS: 'rixa_post_details',
-  USER_DETAILS: 'rixa_user_details'
+  CURRENT_VIEW: "rixa_current_view",
+  POST_DETAILS: "rixa_post_details",
+  USER_DETAILS: "rixa_user_details",
 } as const;
 
 // Valid navigation views
-const VALID_VIEWS: NavigationView[] = ['home', 'profile', 'settings', 'login', 'signup', 'post-details', 'user-profile'];
+const VALID_VIEWS: NavigationView[] = [
+  "home",
+  "profile",
+  "settings",
+  "login",
+  "signup",
+  "post-details",
+  "user-profile",
+];
 
 // Helper function to validate and get saved view
 const getSavedView = (): NavigationView => {
@@ -36,7 +44,7 @@ const getSavedView = (): NavigationView => {
       return savedView as NavigationView;
     }
   } catch (error) {
-    console.warn('Failed to read from localStorage:', error);
+    console.warn("Failed to read from localStorage:", error);
   }
   return "home";
 };
@@ -52,7 +60,7 @@ const getSavedPostDetails = (): PostDetailsState | null => {
       }
     }
   } catch (error) {
-    console.warn('Failed to read post details from localStorage:', error);
+    console.warn("Failed to read post details from localStorage:", error);
   }
   return null;
 };
@@ -68,15 +76,17 @@ const getSavedUserDetails = (): UserProfileState | null => {
       }
     }
   } catch (error) {
-    console.warn('Failed to read user details from localStorage:', error);
+    console.warn("Failed to read user details from localStorage:", error);
   }
   return null;
 };
 
 function App() {
   const [currentView, setCurrentView] = useState<NavigationView>(getSavedView);
-  const [postDetailsState, setPostDetailsState] = useState<PostDetailsState | null>(getSavedPostDetails);
-  const [userDetailsState, setUserDetailsState] = useState<UserProfileState | null>(getSavedUserDetails);
+  const [postDetailsState, setPostDetailsState] =
+    useState<PostDetailsState | null>(getSavedPostDetails);
+  const [userDetailsState, setUserDetailsState] =
+    useState<UserProfileState | null>(getSavedUserDetails);
   const { isAuthenticated } = useAuth();
 
   // Save current view to localStorage whenever it changes
@@ -84,7 +94,7 @@ function App() {
     try {
       localStorage.setItem(STORAGE_KEYS.CURRENT_VIEW, currentView);
     } catch (error) {
-      console.warn('Failed to save view to localStorage:', error);
+      console.warn("Failed to save view to localStorage:", error);
     }
   }, [currentView]);
 
@@ -92,12 +102,15 @@ function App() {
   useEffect(() => {
     try {
       if (postDetailsState) {
-        localStorage.setItem(STORAGE_KEYS.POST_DETAILS, JSON.stringify(postDetailsState));
+        localStorage.setItem(
+          STORAGE_KEYS.POST_DETAILS,
+          JSON.stringify(postDetailsState)
+        );
       } else {
         localStorage.removeItem(STORAGE_KEYS.POST_DETAILS);
       }
     } catch (error) {
-      console.warn('Failed to save post details to localStorage:', error);
+      console.warn("Failed to save post details to localStorage:", error);
     }
   }, [postDetailsState]);
 
@@ -105,25 +118,34 @@ function App() {
   useEffect(() => {
     try {
       if (userDetailsState) {
-        localStorage.setItem(STORAGE_KEYS.USER_DETAILS, JSON.stringify(userDetailsState));
+        localStorage.setItem(
+          STORAGE_KEYS.USER_DETAILS,
+          JSON.stringify(userDetailsState)
+        );
       } else {
         localStorage.removeItem(STORAGE_KEYS.USER_DETAILS);
       }
     } catch (error) {
-      console.warn('Failed to save user details to localStorage:', error);
+      console.warn("Failed to save user details to localStorage:", error);
     }
   }, [userDetailsState]);
 
   // Handle authentication state changes
   useEffect(() => {
-    if (!isAuthenticated && (currentView === "profile" || currentView === "settings")) {
+    if (
+      !isAuthenticated &&
+      (currentView === "profile" || currentView === "settings")
+    ) {
       setCurrentView("home");
       setPostDetailsState(null);
       setUserDetailsState(null);
       return;
     }
-    
-    if (isAuthenticated && (currentView === "login" || currentView === "signup")) {
+
+    if (
+      isAuthenticated &&
+      (currentView === "login" || currentView === "signup")
+    ) {
       setCurrentView("home");
       setPostDetailsState(null);
       setUserDetailsState(null);
@@ -169,9 +191,13 @@ function App() {
     switch (currentView) {
       case "home":
         return (
-          <HomeView 
-            onPostClick={(view, postDetails) => handleViewChange(view, postDetails)}
-            onUserClick={(view, userDetails) => handleViewChange(view, undefined, userDetails)}
+          <HomeView
+            onPostClick={(view, postDetails) =>
+              handleViewChange(view, postDetails)
+            }
+            onUserClick={(view, userDetails) =>
+              handleViewChange(view, undefined, userDetails)
+            }
           />
         );
       case "profile":
@@ -191,12 +217,19 @@ function App() {
             postId={postDetailsState.postId}
             postType={postDetailsState.postType}
             onBack={() => handleViewChange("home")}
-            onCommentClick={(view: NavigationView, postDetails?: PostDetailsState) => handleViewChange(view, postDetails)}
+            onCommentClick={(
+              view: NavigationView,
+              postDetails?: PostDetailsState
+            ) => handleViewChange(view, postDetails)}
           />
         ) : (
-          <HomeView 
-            onPostClick={(view, postDetails) => handleViewChange(view, postDetails)}
-            onUserClick={(view, userDetails) => handleViewChange(view, undefined, userDetails)}
+          <HomeView
+            onPostClick={(view, postDetails) =>
+              handleViewChange(view, postDetails)
+            }
+            onUserClick={(view, userDetails) =>
+              handleViewChange(view, undefined, userDetails)
+            }
           />
         );
       case "user-profile":
@@ -206,16 +239,24 @@ function App() {
             onBack={() => handleViewChange("home")}
           />
         ) : (
-          <HomeView 
-            onPostClick={(view, postDetails) => handleViewChange(view, postDetails)}
-            onUserClick={(view, userDetails) => handleViewChange(view, undefined, userDetails)}
+          <HomeView
+            onPostClick={(view, postDetails) =>
+              handleViewChange(view, postDetails)
+            }
+            onUserClick={(view, userDetails) =>
+              handleViewChange(view, undefined, userDetails)
+            }
           />
         );
       default:
         return (
-          <HomeView 
-            onPostClick={(view, postDetails) => handleViewChange(view, postDetails)}
-            onUserClick={(view, userDetails) => handleViewChange(view, undefined, userDetails)}
+          <HomeView
+            onPostClick={(view, postDetails) =>
+              handleViewChange(view, postDetails)
+            }
+            onUserClick={(view, userDetails) =>
+              handleViewChange(view, undefined, userDetails)
+            }
           />
         );
     }
@@ -225,15 +266,24 @@ function App() {
     switch (currentView) {
       case "home":
         return (
-          <SideHomeView 
-            onUserClick={(view, userDetails) => handleViewChange(view, undefined, userDetails)}
+          <SideHomeView
+            onUserClick={(view, userDetails) =>
+              handleViewChange(view, undefined, userDetails)
+            }
           />
         );
       case "post-details":
         return <div className="p-4 text-rixa-cream">Post Details Sidebar</div>;
       case "profile":
+        return (
+          <SideProfileView
+            onUserClick={(view, userDetails) =>
+              handleViewChange(view, undefined, userDetails)
+            }
+          />
+        );
       case "user-profile":
-        return <SideProfileView />;
+        return <div className="p-4 text-rixa-cream">Profile Sidebar</div>;
       case "settings":
         return (
           <div className="p-5">

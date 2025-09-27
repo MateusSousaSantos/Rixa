@@ -21,9 +21,9 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({ userDetails, o
         setLoading(true)
         setError(null)
         
-        // In a real app, you'd fetch by username or userId
-        // For now, we'll simulate finding a user by username
-        const response = await getUserById('1') // Mock - in real app use userDetails.userId or search by username
+        // Use the userId from userDetails if available, otherwise fallback to first user for demo
+        const userId = userDetails.userId || '1'
+        const response = await getUserById(userId)
         
         if (response.success && response.data) {
           setUser(response.data)
