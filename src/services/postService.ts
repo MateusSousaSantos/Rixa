@@ -218,7 +218,7 @@ export const voteInPoll = async (postId: number, optionId: number): Promise<ApiR
     }
   }
   
-  const option = post.options?.find(opt => opt.id === optionId)
+  const option = post.options?.find((opt: any) => opt.id === optionId)
   if (!option) {
     return {
       data: false,

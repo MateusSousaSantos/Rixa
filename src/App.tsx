@@ -191,7 +191,7 @@ function App() {
             postId={postDetailsState.postId}
             postType={postDetailsState.postType}
             onBack={() => handleViewChange("home")}
-            onCommentClick={(view, postDetails) => handleViewChange(view, postDetails)}
+            onCommentClick={(view: NavigationView, postDetails?: PostDetailsState) => handleViewChange(view, postDetails)}
           />
         ) : (
           <HomeView 
