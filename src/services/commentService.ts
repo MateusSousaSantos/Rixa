@@ -1,4 +1,4 @@
-import type { CommentData } from '../components/Posts/Comment'
+import type { CommentData } from '../components/posts/Comment'
 import { simulateDelay, type ApiResponse } from './api'
 
 // Mock comment data store

@@ -15,7 +15,7 @@ import { SideHomeView } from "./components/SideHomeView";
 import type { NavigationView } from "./types/navigation";
 import type { PostDetailsState, UserProfileState } from "./types/navigation";
 import { queryClient } from "./lib/queryClient";
-import { MobilePost } from "./components/Posts/MobilePost";
+import { MobilePost } from "./components/posts/MobilePost";
 import { SideProfileView } from "./components/Profile/SideProfileView";
 
 // Constants for localStorage keys

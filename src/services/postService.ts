@@ -1,4 +1,4 @@
-import type { PostType } from '../components/Posts/index'
+import type { PostType } from '../components/posts/index'
 import { simulateDelay, type ApiResponse } from './api'
 
 const mockPosts: PostType[] = [

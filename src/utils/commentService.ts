@@ -1,5 +1,5 @@
 // Mock data service to simulate comment replies
-import type { CommentData } from "../components/Posts/Comment";
+import type { CommentData } from "../components/posts/Comment";
 
 // Mock database of comments and their replies
 const mockCommentDatabase: Record<number, CommentData[]> = {
