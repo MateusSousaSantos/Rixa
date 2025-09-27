@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import {
@@ -8,58 +8,172 @@ import {
   SettingsView,
   LoginView,
   PostDetails,
+  UserProfileView,
 } from "./components";
 import { useAuth } from "./hooks";
 import { SideHomeView } from "./components/SideHomeView";
 import type { NavigationView } from "./types/navigation";
-import type { PostDetailsState } from "./types/navigation";
+import type { PostDetailsState, UserProfileState } from "./types/navigation";
 import { queryClient } from "./lib/queryClient";
-import { MobilePost } from "./components/MobilePost";
+import { MobilePost } from "./components/Posts/MobilePost";
+import { SideProfileView } from "./components/Profile/SideProfileView";
+
+// Constants for localStorage keys
+const STORAGE_KEYS = {
+  CURRENT_VIEW: 'rixa_current_view',
+  POST_DETAILS: 'rixa_post_details',
+  USER_DETAILS: 'rixa_user_details'
+} as const;
+
+// Valid navigation views
+const VALID_VIEWS: NavigationView[] = ['home', 'profile', 'settings', 'login', 'signup', 'post-details', 'user-profile'];
+
+// Helper function to validate and get saved view
+const getSavedView = (): NavigationView => {
+  try {
+    const savedView = localStorage.getItem(STORAGE_KEYS.CURRENT_VIEW);
+    if (savedView && VALID_VIEWS.includes(savedView as NavigationView)) {
+      return savedView as NavigationView;
+    }
+  } catch (error) {
+    console.warn('Failed to read from localStorage:', error);
+  }
+  return "home";
+};
+
+// Helper function to get saved post details
+const getSavedPostDetails = (): PostDetailsState | null => {
+  try {
+    const savedPostDetails = localStorage.getItem(STORAGE_KEYS.POST_DETAILS);
+    if (savedPostDetails) {
+      const parsed = JSON.parse(savedPostDetails);
+      if (parsed && parsed.author && parsed.content && parsed.postId) {
+        return parsed;
+      }
+    }
+  } catch (error) {
+    console.warn('Failed to read post details from localStorage:', error);
+  }
+  return null;
+};
+
+// Helper function to get saved user details
+const getSavedUserDetails = (): UserProfileState | null => {
+  try {
+    const savedUserDetails = localStorage.getItem(STORAGE_KEYS.USER_DETAILS);
+    if (savedUserDetails) {
+      const parsed = JSON.parse(savedUserDetails);
+      if (parsed && parsed.username) {
+        return parsed;
+      }
+    }
+  } catch (error) {
+    console.warn('Failed to read user details from localStorage:', error);
+  }
+  return null;
+};
 
 function App() {
-  const [currentView, setCurrentView] = useState<NavigationView>("home");
-  const [postDetailsState, setPostDetailsState] =
-    useState<PostDetailsState | null>(null);
+  const [currentView, setCurrentView] = useState<NavigationView>(getSavedView);
+  const [postDetailsState, setPostDetailsState] = useState<PostDetailsState | null>(getSavedPostDetails);
+  const [userDetailsState, setUserDetailsState] = useState<UserProfileState | null>(getSavedUserDetails);
   const { isAuthenticated } = useAuth();
 
-  // Handle view changes and redirect unauthenticated users
+  // Save current view to localStorage whenever it changes
+  useEffect(() => {
+    try {
+      localStorage.setItem(STORAGE_KEYS.CURRENT_VIEW, currentView);
+    } catch (error) {
+      console.warn('Failed to save view to localStorage:', error);
+    }
+  }, [currentView]);
+
+  // Save post details to localStorage whenever they change
+  useEffect(() => {
+    try {
+      if (postDetailsState) {
+        localStorage.setItem(STORAGE_KEYS.POST_DETAILS, JSON.stringify(postDetailsState));
+      } else {
+        localStorage.removeItem(STORAGE_KEYS.POST_DETAILS);
+      }
+    } catch (error) {
+      console.warn('Failed to save post details to localStorage:', error);
+    }
+  }, [postDetailsState]);
+
+  // Save user details to localStorage whenever they change
+  useEffect(() => {
+    try {
+      if (userDetailsState) {
+        localStorage.setItem(STORAGE_KEYS.USER_DETAILS, JSON.stringify(userDetailsState));
+      } else {
+        localStorage.removeItem(STORAGE_KEYS.USER_DETAILS);
+      }
+    } catch (error) {
+      console.warn('Failed to save user details to localStorage:', error);
+    }
+  }, [userDetailsState]);
+
+  // Handle authentication state changes
+  useEffect(() => {
+    if (!isAuthenticated && (currentView === "profile" || currentView === "settings")) {
+      setCurrentView("home");
+      setPostDetailsState(null);
+      setUserDetailsState(null);
+      return;
+    }
+    
+    if (isAuthenticated && (currentView === "login" || currentView === "signup")) {
+      setCurrentView("home");
+      setPostDetailsState(null);
+      setUserDetailsState(null);
+      return;
+    }
+  }, [isAuthenticated, currentView]);
+
+  // Handle view changes
   const handleViewChange = (
     view: NavigationView,
-    postDetails?: PostDetailsState
+    postDetails?: PostDetailsState,
+    userDetails?: UserProfileState
   ) => {
-    // Redirect to login if trying to access protected views while not authenticated
     if (!isAuthenticated && (view === "profile" || view === "settings")) {
       setCurrentView("login");
+      setPostDetailsState(null);
+      setUserDetailsState(null);
       return;
     }
 
-    // Redirect to home if authenticated user tries to access login/signup
     if (isAuthenticated && (view === "login" || view === "signup")) {
       setCurrentView("home");
+      setPostDetailsState(null);
+      setUserDetailsState(null);
       return;
     }
 
     if (view === "post-details" && postDetails) {
       setPostDetailsState(postDetails);
+      setUserDetailsState(null);
+    } else if (view === "user-profile" && userDetails) {
+      setUserDetailsState(userDetails);
+      setPostDetailsState(null);
+    } else if (view !== "post-details" && view !== "user-profile") {
+      setPostDetailsState(null);
+      setUserDetailsState(null);
     }
 
     setCurrentView(view);
   };
 
-  // Auto-redirect to home after login
-  React.useEffect(() => {
-    if (
-      isAuthenticated &&
-      (currentView === "login" || currentView === "signup")
-    ) {
-      setCurrentView("home");
-    }
-  }, [isAuthenticated, currentView]);
-
   const renderCurrentView = () => {
     switch (currentView) {
       case "home":
-        return <HomeView onPostClick={handleViewChange} />;
+        return (
+          <HomeView 
+            onPostClick={(view, postDetails) => handleViewChange(view, postDetails)}
+            onUserClick={(view, userDetails) => handleViewChange(view, undefined, userDetails)}
+          />
+        );
       case "profile":
         return <ProfileView />;
       case "settings":
@@ -76,27 +190,63 @@ function App() {
             timestamp={postDetailsState.timestamp}
             postId={postDetailsState.postId}
             postType={postDetailsState.postType}
-            onBack={() => setCurrentView("home")}
-            onCommentClick={handleViewChange}
+            onBack={() => handleViewChange("home")}
+            onCommentClick={(view, postDetails) => handleViewChange(view, postDetails)}
           />
         ) : (
-          <HomeView onPostClick={handleViewChange} />
+          <HomeView 
+            onPostClick={(view, postDetails) => handleViewChange(view, postDetails)}
+            onUserClick={(view, userDetails) => handleViewChange(view, undefined, userDetails)}
+          />
+        );
+      case "user-profile":
+        return userDetailsState ? (
+          <UserProfileView
+            userDetails={userDetailsState}
+            onBack={() => handleViewChange("home")}
+          />
+        ) : (
+          <HomeView 
+            onPostClick={(view, postDetails) => handleViewChange(view, postDetails)}
+            onUserClick={(view, userDetails) => handleViewChange(view, undefined, userDetails)}
+          />
         );
       default:
-        return <HomeView onPostClick={handleViewChange} />;
+        return (
+          <HomeView 
+            onPostClick={(view, postDetails) => handleViewChange(view, postDetails)}
+            onUserClick={(view, userDetails) => handleViewChange(view, undefined, userDetails)}
+          />
+        );
     }
   };
 
   const renderCurrentSideView = () => {
     switch (currentView) {
       case "home":
-        return <SideHomeView onPostClick={handleViewChange} />;
+        return (
+          <SideHomeView 
+            onUserClick={(view, userDetails) => handleViewChange(view, undefined, userDetails)}
+          />
+        );
       case "post-details":
         return <div className="p-4 text-rixa-cream">Post Details Sidebar</div>;
       case "profile":
-        return <div className="p-4 text-rixa-cream">Profile Sidebar</div>;
+      case "user-profile":
+        return <SideProfileView />;
       case "settings":
-        return <div className="p-4 text-rixa-cream">Settings Sidebar</div>;
+        return (
+          <div className="p-5">
+            <div className="bg-rixa-dark rounded-lg p-6 border border-rixa-blue/20">
+              <h1 className="text-2xl font-bold text-rixa-cream mb-2">
+                Settings
+              </h1>
+              <p className="text-rixa-cream/70">
+                Customize sua experiência no RIXA!
+              </p>
+            </div>
+          </div>
+        );
       default:
         return null;
     }
@@ -106,8 +256,8 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <div className="min-h-screen bg-rixa-dark-shadow">
         <Header
-          currentView={currentView as NavigationView}
-          onViewChange={handleViewChange}
+          currentView={currentView}
+          onViewChange={(view) => handleViewChange(view)}
         />
 
         <div className="flex h-[calc(99vh-64px)]">
@@ -134,7 +284,7 @@ function App() {
   );
 }
 
-// Simple SignupView component
+// SignupView component
 const SignupView: React.FC = () => {
   return (
     <div className="space-y-6">
@@ -147,7 +297,6 @@ const SignupView: React.FC = () => {
         </p>
       </div>
 
-      {/* Add signup form here - similar to LoginForm */}
       <div className="bg-rixa-dark rounded-lg shadow-sm border border-rixa-blue/20 p-6">
         <h2 className="text-xl font-semibold text-rixa-cream mb-4">Sign Up</h2>
         <p className="text-rixa-cream/70">Signup form coming soon...</p>

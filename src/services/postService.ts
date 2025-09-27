@@ -1,7 +1,6 @@
-import type { PostType } from '../components/posts/index'
+import type { PostType } from '../components/Posts/index'
 import { simulateDelay, type ApiResponse } from './api'
 
-// Mock data store
 const mockPosts: PostType[] = [
   {
     id: 1,
@@ -53,7 +52,7 @@ const mockPosts: PostType[] = [
     topic: "Política Climática: Ação Agressiva vs Equilíbrio Econômico",
     sides: {
       pro: { 
-        votes: 156, 
+        votes: 5056, 
         arguments: ["Ação urgente é necessária", "Futuras gerações dependem de nós", "Benefícios econômicos da tecnologia verde"], 
         name: "Ação Agressiva" 
       },
@@ -101,15 +100,12 @@ export const fetchPosts = async (
     
     switch (sortBy) {
       case 'newest':
-        // Mock timestamp sorting - in real app would parse actual timestamps
         sortedPosts.sort(() => Math.random() - 0.5) 
         break
       case 'popular':
-        // Sort by engagement (likes + comments - mock calculation)
         sortedPosts.sort(() => Math.random() - 0.5) 
         break
       case 'trending':
-        // Sort by recent activity - mock calculation
         sortedPosts.sort(() => Math.random() - 0.5) 
         break
     }

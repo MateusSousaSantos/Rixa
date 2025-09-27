@@ -1,4 +1,4 @@
-export type NavigationView = 'home' | 'profile' | 'settings' | 'login' | 'signup' | 'post' | 'debate' | 'pool' | 'post-details';
+export type NavigationView = 'home' | 'profile' | 'settings' | 'login' | 'signup' | 'post' | 'debate' | 'pool' | 'post-details' | 'user-profile';
 
 export interface PostDetailsState {
   postId: number;
@@ -6,5 +6,9 @@ export interface PostDetailsState {
   author: string;
   content: string;
   timestamp: string;
-  // Add other post-specific data as needed
+}
+
+export interface UserProfileState {
+  username: string;
+  userId?: string;
 }

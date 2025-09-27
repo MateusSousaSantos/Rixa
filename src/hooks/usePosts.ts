@@ -6,7 +6,7 @@ import {
   voteInPoll, 
   voteInDebate
 } from '../services/postService';
-import type { PostType } from '../components/posts/index';
+import type { PostType } from '../components/Posts/index';
 
 // Query keys
 export const postKeys = {

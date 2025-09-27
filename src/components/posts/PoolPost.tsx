@@ -12,6 +12,7 @@ interface PoolPostProps {
     votes: number;
   }>
   onCommentClick?: () => void
+  onUserClick?: (username: string) => void
 }
 
 export const PoolPost: React.FC<PoolPostProps> = ({ 
@@ -20,7 +21,8 @@ export const PoolPost: React.FC<PoolPostProps> = ({
   timestamp, 
   question, 
   options,
-  onCommentClick
+  onCommentClick,
+  onUserClick
 }) => {
   const [selectedOption, setSelectedOption] = useState<number | null>(null)
   const [hasVoted, setHasVoted] = useState(false)
@@ -38,15 +40,30 @@ export const PoolPost: React.FC<PoolPostProps> = ({
     return totalVotes > 0 ? (votes / totalVotes) * 100 : 0
   }
 
+  const handleUserClick = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    if (onUserClick) {
+      onUserClick(author)
+    }
+  }
+
   return (
     <div className="bg-rixa-dark rounded-lg shadow-sm border border-rixa-blue/20 p-4 mb-4">
       {/* Header */}
       <div className="flex items-center gap-3 mb-3">
-        <div className="w-8 h-8 bg-rixa-blue rounded-full flex items-center justify-center text-white font-semibold text-sm">
+        <div 
+          className="w-8 h-8 bg-rixa-blue rounded-full flex items-center justify-center text-white font-semibold text-sm cursor-pointer hover:bg-rixa-blue/80 transition-colors"
+          onClick={handleUserClick}
+        >
           {author.charAt(0).toUpperCase()}
         </div>
         <div>
-          <h3 className="font-semibold text-rixa-cream">{author}</h3>
+          <h3 
+            className="font-semibold text-rixa-cream cursor-pointer hover:text-rixa-blue transition-colors"
+            onClick={handleUserClick}
+          >
+            {author}
+          </h3>
           <p className="text-sm text-rixa-cream/60">{timestamp}</p>
         </div>
         <div className="ml-auto flex items-center gap-2 text-rixa-cream/60">

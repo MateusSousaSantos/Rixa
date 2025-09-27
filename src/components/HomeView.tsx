@@ -1,17 +1,18 @@
 import React, { useState, useRef, useEffect } from "react";
-import { Post } from "./posts/NormalPost";
-import { DebatePost } from "./posts/DebatePost";
-import { PoolPost } from "./posts/PoolPost";
-import type { PostType } from "../components/posts/index";
-import type { NavigationView, PostDetailsState } from "../types/navigation";
+import { Post } from "./Posts/NormalPost";
+import { DebatePost } from "./Posts/DebatePost";
+import { PoolPost } from "./Posts/PoolPost";
+import type { PostType } from "./Posts/index";
+import type { NavigationView, PostDetailsState, UserProfileState } from "../types/navigation";
 import { FaSearch } from "react-icons/fa";
 import { usePosts, useSearchPosts } from "../hooks";
 
 interface HomeViewProps {
   onPostClick?: (view: NavigationView, postDetails?: PostDetailsState) => void;
+  onUserClick?: (view: NavigationView, userDetails?: UserProfileState) => void;
 }
 
-export const HomeView: React.FC<HomeViewProps> = ({ onPostClick }) => {
+export const HomeView: React.FC<HomeViewProps> = ({ onPostClick, onUserClick }) => {
   const [searchFocused, setSearchFocused] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState<'newest' | 'popular' | 'trending'>('newest');
@@ -38,7 +39,6 @@ export const HomeView: React.FC<HomeViewProps> = ({ onPostClick }) => {
 
   const handleSearch = (query: string) => {
     setSearchQuery(query);
-    // React Query will automatically handle the search when searchQuery changes
   };
 
   // Handle click outside to close search
@@ -68,9 +68,17 @@ export const HomeView: React.FC<HomeViewProps> = ({ onPostClick }) => {
     }
   };
 
+  const handleUserClick = (username: string) => {
+    if (onUserClick) {
+      const userDetails: UserProfileState = {
+        username: username,
+      };
+      onUserClick('user-profile', userDetails);
+    }
+  };
+
   const popularTags = ["Debate", "Enquete", "Notícias", "Tech", "Política", "Esportes", "Música", "Arte"];
   
-  // ...existing SearchBar component...
   const SearchBar = () => {
     return (
       <div className="sticky top-0 z-10 w-full bg-rixa-dark shadow-sm border-b border-rixa-blue/20 p-2 mb-4">
@@ -147,6 +155,7 @@ export const HomeView: React.FC<HomeViewProps> = ({ onPostClick }) => {
             content={post.content}
             timestamp={post.timestamp}
             onCommentClick={() => handleCommentClick(post)}
+            onUserClick={handleUserClick}
           />
         );
       case 'debate':
@@ -159,6 +168,7 @@ export const HomeView: React.FC<HomeViewProps> = ({ onPostClick }) => {
             topic={post.topic}
             sides={post.sides}
             onCommentClick={() => handleCommentClick(post)}
+            onUserClick={handleUserClick}
           />
         );
       case 'pool':
@@ -171,6 +181,7 @@ export const HomeView: React.FC<HomeViewProps> = ({ onPostClick }) => {
             question={post.question}
             options={post.options}
             onCommentClick={() => handleCommentClick(post)}
+            onUserClick={handleUserClick}
           />
         );
       default:
