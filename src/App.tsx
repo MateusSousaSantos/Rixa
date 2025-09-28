@@ -17,6 +17,7 @@ import type { PostDetailsState, UserProfileState } from "./types/navigation";
 import { queryClient } from "./lib/queryClient";
 import { MobilePost } from "./components/posts/MobilePost";
 import { SideProfileView } from "./components/Profile/SideProfileView";
+import { parseSharedPostFromUrl } from "./utils";
 
 // Constants for localStorage keys
 const STORAGE_KEYS = {
@@ -152,6 +153,37 @@ function App() {
       return;
     }
   }, [isAuthenticated, currentView]);
+
+  // Handle shared post URLs on app load
+  useEffect(() => {
+    const sharedPost = parseSharedPostFromUrl()
+    if (sharedPost) {
+      // Fetch the post data and navigate to post details
+      import('./services/postService').then(({ fetchPostById }) => {
+        fetchPostById(sharedPost.postId).then((response) => {
+          if (response.success && response.data) {
+            const post = response.data
+            const postDetails: PostDetailsState = {
+              postId: post.id,
+              postType: post.type,
+              author: post.author,
+              content: post.content,
+              timestamp: post.timestamp,
+            }
+            handleViewChange('post-details', postDetails)
+            
+            // Clear URL parameters
+            window.history.replaceState({}, '', window.location.pathname)
+          } else {
+            // If post not found, stay on home but show a notification
+            console.warn('Shared post not found:', sharedPost.postId)
+          }
+        }).catch((error) => {
+          console.error('Failed to load shared post:', error)
+        })
+      })
+    }
+  }, []) // Empty dependency array - only run on mount
 
   // Handle view changes
   const handleViewChange = (

@@ -34,3 +34,6 @@ export type PostType = NormalPost | DebatePost | PoolPost;
 // Export comment types
 export type { CommentData } from './Comment';
 export { Comment } from './Comment';
+
+// Export share functionality
+export { ShareButton } from './ShareButton';

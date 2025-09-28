@@ -2,11 +2,11 @@ import React, { useState } from "react";
 import {
   FiHeart,
   FiMessageCircle,
-  FiShare2,
   FiMoreHorizontal,
   FiUsers,
 } from "react-icons/fi";
 import type { PostProps } from "./NormalPost";
+import { ShareButton } from './ShareButton';
 
 interface DebatePostProps extends PostProps {
   topic: string;
@@ -17,6 +17,7 @@ interface DebatePostProps extends PostProps {
 }
 
 export const DebatePost: React.FC<DebatePostProps> = ({
+  postId,
   author,
   content,
   timestamp,
@@ -131,10 +132,14 @@ export const DebatePost: React.FC<DebatePostProps> = ({
             <FiMessageCircle size={16} />
             <span>Comment</span>
           </button>
-          <button className="flex items-center gap-2 text-sm text-rixa-cream/60 hover:text-rixa-blue transition-colors">
-            <FiShare2 size={16} />
-            <span>Share</span>
-          </button>
+          <ShareButton 
+            options={{
+              postId,
+              author,
+              content,
+              postType: 'debate'
+            }}
+          />
         </div>
         <button className="text-rixa-cream/40 hover:text-rixa-cream/60 transition-colors">
           <FiMoreHorizontal size={16} />

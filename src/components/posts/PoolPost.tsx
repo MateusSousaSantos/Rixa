@@ -1,7 +1,9 @@
 import React, { useState } from 'react'
-import { FiHeart, FiMessageCircle, FiShare2, FiMoreHorizontal, FiBarChart } from 'react-icons/fi'
+import { FiHeart, FiMessageCircle, FiMoreHorizontal, FiBarChart } from 'react-icons/fi'
+import { ShareButton } from './ShareButton'
 
 interface PoolPostProps {
+  postId: number
   author: string
   content: string
   timestamp: string
@@ -16,6 +18,7 @@ interface PoolPostProps {
 }
 
 export const PoolPost: React.FC<PoolPostProps> = ({ 
+  postId,
   author, 
   content, 
   timestamp, 
@@ -143,10 +146,14 @@ export const PoolPost: React.FC<PoolPostProps> = ({
             <FiMessageCircle size={16} />
             <span>Comment</span>
           </button>
-          <button className="flex items-center gap-2 text-sm text-rixa-cream/60 hover:text-rixa-blue transition-colors">
-            <FiShare2 size={16} />
-            <span>Share</span>
-          </button>
+          <ShareButton 
+            options={{
+              postId,
+              author,
+              content: question,
+              postType: 'pool'
+            }}
+          />
         </div>
         <button className="text-rixa-cream/40 hover:text-rixa-cream/60 transition-colors">
           <FiMoreHorizontal size={16} />

@@ -63,13 +63,13 @@ export const SideProfileView: React.FC<SideProfileViewProps> = ({ onUserClick })
             Erro ao carregar usuários recomendados
           </p>
         ) : recommendedUsers && recommendedUsers.length > 0 ? (
-          <div className="space-y-4">
+          <div className="space-y-1">
             {recommendedUsers.map((recommendedUser) => (
-              <div key={recommendedUser.id} className="flex items-center justify-between">
+              <div key={recommendedUser.id} className="flex items-center justify-between hover:bg-rixa-blue/10 py-1 px-2 rounded-lg transition-colors">
                 <button
                   onClick={() => onUserClick?.('user-profile', { username: recommendedUser.username, userId: recommendedUser.id })}
                   className={`flex items-center space-x-3 flex-1 text-left rounded-lg p-2 -m-2 transition-colors ${
-                    onUserClick ? 'hover:bg-rixa-blue/10 cursor-pointer' : 'cursor-default'
+                    onUserClick ? ' cursor-pointer' : 'cursor-default'
                   }`}
                   disabled={!onUserClick}
                   title={onUserClick ? `Ver perfil de ${recommendedUser.displayName}` : undefined}

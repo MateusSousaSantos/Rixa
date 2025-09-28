@@ -151,6 +151,7 @@ export const HomeView: React.FC<HomeViewProps> = ({ onPostClick, onUserClick }) 
         return (
           <Post
             key={post.id}
+            postId={post.id}
             author={post.author}
             content={post.content}
             timestamp={post.timestamp}
@@ -162,6 +163,7 @@ export const HomeView: React.FC<HomeViewProps> = ({ onPostClick, onUserClick }) 
         return (
           <DebatePost
             key={post.id}
+            postId={post.id}
             author={post.author}
             content={post.content}
             timestamp={post.timestamp}
@@ -175,6 +177,7 @@ export const HomeView: React.FC<HomeViewProps> = ({ onPostClick, onUserClick }) 
         return (
           <PoolPost
             key={post.id}
+            postId={post.id}
             author={post.author}
             content={post.content}
             timestamp={post.timestamp}

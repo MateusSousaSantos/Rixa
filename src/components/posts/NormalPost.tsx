@@ -1,7 +1,9 @@
 import React from 'react'
-import { FiHeart, FiMessageCircle, FiShare2, FiMoreHorizontal } from 'react-icons/fi'
+import { FiHeart, FiMessageCircle, FiMoreHorizontal } from 'react-icons/fi'
+import { ShareButton } from './ShareButton'
 
 export interface PostProps {
+  postId: number
   author: string
   content: string
   timestamp: string
@@ -9,7 +11,7 @@ export interface PostProps {
   onUserClick?: (username: string) => void
 }
 
-export const Post: React.FC<PostProps> = ({ author, content, timestamp, onCommentClick, onUserClick }) => {
+export const Post: React.FC<PostProps> = ({ postId, author, content, timestamp, onCommentClick, onUserClick }) => {
   const handleUserClick = (e: React.MouseEvent) => {
     e.stopPropagation()
     if (onUserClick) {
@@ -48,9 +50,14 @@ export const Post: React.FC<PostProps> = ({ author, content, timestamp, onCommen
           >
             <FiMessageCircle size={16} />
           </button>
-          <button className="flex items-center gap-2 text-sm text-rixa-cream/60 hover:text-rixa-blue transition-colors">
-            <FiShare2 size={16} />
-          </button>
+          <ShareButton 
+            options={{
+              postId,
+              author,
+              content,
+              postType: 'normal'
+            }}
+          />
         </div>
         <button className="text-rixa-cream/40 hover:text-rixa-cream/60 transition-colors">
           <FiMoreHorizontal size={16} />
