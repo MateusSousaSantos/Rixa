@@ -45,11 +45,7 @@ export const ShareMenu: React.FC<ShareMenuProps> = ({ options, onClose }) => {
     if (onClose) onClose();
   };
 
-  const socialPlatforms = [
-    { key: "twitter" as const, name: "Twitter", color: "text-blue-400" },
-    { key: "facebook" as const, name: "Facebook", color: "text-blue-600" },
-    { key: "whatsapp" as const, name: "WhatsApp", color: "text-green-500" },
-  ];
+
 
   return (
     <div className="absolute right-0 top-full mt-2 bg-rixa-dark border border-rixa-blue/20 rounded-lg shadow-lg py-2 min-w-[200px] z-50">
