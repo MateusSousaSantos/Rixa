@@ -157,7 +157,20 @@ export const createErrorResponse = <T = null>(
   message
 })
 
-
+export const makeHealthCheck = async (): Promise<boolean> => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/health`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    })
+    return response.ok
+  } catch (error) {
+    console.error('Health check failed:', error)
+    return false
+  }
+}
 
 export { simulateDelay }
 export type { ApiResponse }

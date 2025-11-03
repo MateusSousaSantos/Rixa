@@ -11,17 +11,19 @@ import {
   SignUpForm,
   AuthInterceptorProvider,
   ToastContainer,
-  UserProfileByUsername
+  UserProfileByUsername,
+  ErrorScreen,
+  LoadingScreen
 } from "./components";
 import { PostDetails } from "./components/posts/PostDetails";
-import { useAuth } from "./hooks";
+import { useAuth, useHealthCheck } from "./hooks";
 import { SideHomeView } from "./components/views/SideHomeView";
 import { queryClient } from "./lib/queryClient";
 import { MobilePost } from "./components/posts/MobilePost";
 
 const AppLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { isAuthenticated } = useAuth();
-
+  
   return (
     <div className="min-h-screen bg-rixa-dark-shadow">
       <Header />
@@ -211,6 +213,19 @@ const UserProfilePage: React.FC = () => {
 };
 
 function App() {
+  const { isHealthy, isLoading, retryHealthCheck } = useHealthCheck();
+
+  // Show loading screen while checking health
+  if (isLoading) {
+    return <LoadingScreen />;
+  }
+
+  // Show error screen if health check failed
+  if (isHealthy === false) {
+    return <ErrorScreen onRetry={retryHealthCheck} isLoading={isLoading} />;
+  }
+
+  // Show normal app if health check passed
   return (
     <QueryClientProvider client={queryClient}>
       <Router>
