@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
-import { Post } from "../Posts/NormalPost";
-import { DebatePost } from "../Posts/DebatePost";
-import type { PostType } from "../Posts/index";
+import { Post } from "../posts/NormalPost";
+import { DebatePost } from "../posts/DebatePost";
+import type { PostType } from "../posts/index";
 import type { NavigationView, PostDetailsState, UserProfileState } from "../../types/navigation";
 import { FaSearch, FaTimes } from "react-icons/fa";
 import { usePosts, useSearchPosts } from "../../hooks";

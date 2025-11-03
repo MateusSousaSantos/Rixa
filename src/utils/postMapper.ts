@@ -1,7 +1,7 @@
 // Data transformation utilities following industry best practices
 // Separates data transformation logic from service logic
 
-import type { PostType, DebatePost, NormalPost } from '../components/Posts/index'
+import type { PostType, DebatePost, NormalPost } from '../components/posts/index'
 
 // Type-safe mapping function with comprehensive field handling
 export const mapBackendPostToFrontend = (backendPost: any): PostType => {

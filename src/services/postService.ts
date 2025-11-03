@@ -1,4 +1,4 @@
-import type { PostType, DebatePost, NormalPost } from '../components/Posts/index'
+import type { PostType, DebatePost, NormalPost } from '../components/posts/index'
 import { 
   API_BASE_URL,
   type ApiResponse, 

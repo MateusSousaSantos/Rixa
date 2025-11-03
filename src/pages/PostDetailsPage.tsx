@@ -2,7 +2,7 @@ import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Header } from '../components/ui/Header';
 import { SideHomeView } from '../components/views/SideHomeView';
-import { PostDetails } from '../components/Posts/PostDetails';
+import { PostDetails } from '../components/posts/PostDetails';
 import type { NavigationView, UserProfileState } from '../types/navigation';
 
 interface PostDetailsPageProps {

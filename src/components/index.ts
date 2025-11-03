@@ -10,8 +10,8 @@ export { SideHomeView } from './views/SideHomeView'
 export { UserFollowButton } from './features/UserFollowButton'
 
 // Post Components
-export { Post } from './Posts/NormalPost'
-export { PostDetails } from './Posts/PostDetails'
+export { Post } from './posts/NormalPost'
+export { PostDetails } from './posts/PostDetails'
 
 // Profile Components
 export { UserProfile } from './Profile/UserProfile'
