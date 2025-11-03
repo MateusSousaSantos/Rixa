@@ -1,5 +1,10 @@
-import type { CommentData } from '../components/posts/Comment'
-import { simulateDelay, type ApiResponse } from './api'
+import type { CommentData } from '../components/Posts/Comment'
+import { 
+  simulateDelay, 
+  type ApiResponse, 
+  createSuccessResponse, 
+  createErrorResponse 
+} from './api'
 
 // Mock comment data store
 const mockComments: Record<number, CommentData[]> = {
@@ -46,16 +51,12 @@ export const fetchComments = async (
   const endIndex = startIndex + limit
   const paginatedComments = comments.slice(startIndex, endIndex)
   
-  return {
-    data: paginatedComments,
-    success: true,
-    pagination: {
-      page,
-      limit,
-      total: comments.length,
-      totalPages: Math.ceil(comments.length / limit)
-    }
-  }
+  return createSuccessResponse(paginatedComments, undefined, {
+    page,
+    limit,
+    total: comments.length,
+    totalPages: Math.ceil(comments.length / limit)
+  });
 }
 
 export const createComment = async (
@@ -93,11 +94,7 @@ export const createComment = async (
     Object.values(mockComments).forEach(updateReplyCount)
   }
   
-  return {
-    data: newComment,
-    success: true,
-    message: 'Comentário adicionado com sucesso'
-  }
+  return createSuccessResponse(newComment, 'Comentário adicionado com sucesso');
 }
 
 export const deleteComment = async (commentId: number): Promise<ApiResponse<boolean>> => {
@@ -108,19 +105,11 @@ export const deleteComment = async (commentId: number): Promise<ApiResponse<bool
     const index = mockComments[postId].findIndex(c => c.id === commentId)
     if (index !== -1) {
       mockComments[postId].splice(index, 1)
-      return {
-        data: true,
-        success: true,
-        message: 'Comentário deletado com sucesso'
-      }
+      return createSuccessResponse(true, 'Comentário deletado com sucesso');
     }
   }
   
-  return {
-    data: false,
-    success: false,
-    message: 'Comentário não encontrado'
-  }
+  return createErrorResponse('Comentário não encontrado');
 }
 
 export const likeComment = async (commentId: number): Promise<ApiResponse<boolean>> => {
@@ -130,9 +119,5 @@ export const likeComment = async (commentId: number): Promise<ApiResponse<boolea
   // Using commentId for future implementation
   console.log('Curtindo comentário:', commentId)
   
-  return {
-    data: true,
-    success: true,
-    message: 'Comentário curtido'
-  }
+  return createSuccessResponse(true, 'Comentário curtido');
 }

@@ -1,15 +1,16 @@
 import { useUser } from '../contexts/UserContext'
 
 export const useAuth = () => {
-  const { isAuthenticated, isLoading, user, login, signup, logout } = useUser()
+  const { isAuthenticated, isLoading, user, login, logout, register, updateUser } = useUser()
 
   return {
     isAuthenticated,
     isLoading,
     user,
     login,
-    signup,
+    register, 
     logout,
+    updateUser,
     isLoggedIn: isAuthenticated && user !== null,
   }
 }

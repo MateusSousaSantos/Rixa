@@ -1,8 +1,8 @@
-export type NavigationView = 'home' | 'profile' | 'settings' | 'login' | 'signup' | 'post' | 'debate' | 'pool' | 'post-details' | 'user-profile';
+export type NavigationView = 'home' | 'profile' | 'settings' | 'login' | 'signup' | 'post' | 'debate' | 'post-details' | 'user-profile';
 
 export interface PostDetailsState {
   postId: number;
-  postType: 'normal' | 'debate' | 'pool';
+  postType: 'normal' | 'debate';
   author: string;
   content: string;
   timestamp: string;

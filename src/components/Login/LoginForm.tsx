@@ -1,11 +1,20 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useAuth, useUser } from '../../hooks'
+import { useToast } from '../../contexts/ToastContext'
 
 export const LoginForm: React.FC = () => {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const { login, isLoading } = useAuth()
   const { error } = useUser()
+  const { showError } = useToast()
+
+  // Show error toast when error changes
+  useEffect(() => {
+    if (error) {
+      showError(error);
+    }
+  }, [error, showError]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -48,12 +57,6 @@ export const LoginForm: React.FC = () => {
           />
         </div>
 
-        {error && (
-          <div className="text-rixa-red text-sm">
-            {error}
-          </div>
-        )}
-
         <button
           type="submit"
           disabled={isLoading || !email || !password}
@@ -64,7 +67,10 @@ export const LoginForm: React.FC = () => {
       </form>
       
       <p className="text-sm text-rixa-cream/60 mt-4">
-        Demo: Use any email and password to login
+        Dont't have an account?
+        <a href="/signup" className="text-rixa-blue hover:underline">
+           Sign up 
+        </a>
       </p>
     </div>
   )

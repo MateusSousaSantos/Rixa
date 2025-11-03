@@ -1,17 +1,23 @@
 export interface BasePost {
   id: number;
-  author: string;
-  content: string;
-  timestamp: string;
-  type: "normal" | "debate" | "pool";
+  nomeAutor: string;
+  username: string;
+  conteudo: string;
+  data_criacao: string;
+  tipo_post: "normal" | "debate";
+  likesCount?: number;
+  avatarAutor?: string;
+  isLiked?: boolean;
+  commentCount?: number;
+  hashTags?: { id: number; nome: string; data_criacao: string }[];
 }
 
 export interface NormalPost extends BasePost {
-  type: "normal";
+  tipo_post: "normal";
 }
 
 export interface DebatePost extends BasePost {
-  type: "debate";
+  tipo_post: "debate";
   topic: string;
   sides: {
     pro: { votes: number; arguments: string[]; name?: string };
@@ -19,21 +25,8 @@ export interface DebatePost extends BasePost {
   };
 }
 
-export interface PoolPost extends BasePost {
-  type: "pool";
-  question: string;
-  options: Array<{
-    id: number;
-    text: string;
-    votes: number;
-  }>;
-}
-
-export type PostType = NormalPost | DebatePost | PoolPost;
+export type PostType = NormalPost | DebatePost;
 
 // Export comment types
 export type { CommentData } from './Comment';
 export { Comment } from './Comment';
-
-// Export share functionality
-export { ShareButton } from './ShareButton';

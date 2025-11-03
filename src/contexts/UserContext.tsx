@@ -10,11 +10,13 @@ type UserAction =
   | { type: 'LOGOUT' }
   | { type: 'UPDATE_USER'; payload: Partial<User> }
   | { type: 'CLEAR_ERROR' }
+  | { type: 'REGISTER_START' } 
+  | { type: 'REGISTER_FAILURE'; payload: string }
 
-// Context type
+// Context type - ATUALIZADO
 interface UserContextType extends AuthState {
   login: (email: string, password: string) => Promise<void>
-  signup: (userData: { username: string; email: string; password: string; displayName: string }) => Promise<void>
+  register: (name: string, username: string, email: string, password: string) => Promise<void> 
   logout: () => Promise<void>
   updateUser: (userData: Partial<User>) => Promise<void>
   clearError: () => void
@@ -32,6 +34,7 @@ const initialState: AuthState = {
 const userReducer = (state: AuthState, action: UserAction): AuthState => {
   switch (action.type) {
     case 'LOGIN_START':
+    case 'REGISTER_START': 
       return {
         ...state,
         isLoading: true,
@@ -46,6 +49,7 @@ const userReducer = (state: AuthState, action: UserAction): AuthState => {
         error: null,
       }
     case 'LOGIN_FAILURE':
+    case 'REGISTER_FAILURE':
       return {
         ...state,
         user: null,
@@ -75,14 +79,14 @@ const userReducer = (state: AuthState, action: UserAction): AuthState => {
   }
 }
 
-// Create context
+// Create context 
 const UserContext = createContext<UserContextType | undefined>(undefined)
 
 // Provider component
 export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [state, dispatch] = useReducer(userReducer, initialState)
 
-  // Updated login function using service
+  // Updated login function using service 
   const login = async (email: string, password: string): Promise<void> => {
     dispatch({ type: 'LOGIN_START' })
     
@@ -91,10 +95,11 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
       
       if (response.success) {
         // Store token and user in localStorage for persistence
-        localStorage.setItem('rixa_token', response.data.token)
-        localStorage.setItem('rixa_user', JSON.stringify(response.data.user))
-        
-        dispatch({ type: 'LOGIN_SUCCESS', payload: response.data.user })
+        if(response.data){
+          localStorage.setItem('rixa_token', response.data.token || "")
+          localStorage.setItem('rixa_user', JSON.stringify(response.data.user))
+          dispatch({ type: 'LOGIN_SUCCESS', payload: response.data.user })
+        }
       } else {
         dispatch({ 
           type: 'LOGIN_FAILURE', 
@@ -105,6 +110,35 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
       dispatch({ 
         type: 'LOGIN_FAILURE', 
         payload: error instanceof Error ? error.message : 'Falha no login' 
+      })
+    }
+  }
+
+  // FUNÇÃO DE REGISTRO ATUALIZADA - 4 PARÂMETROS
+  const register = async (name: string, username: string, email: string, password: string): Promise<void> => {
+    dispatch({ type: 'REGISTER_START' })
+    
+    try {
+      console.log('📤 UserContext.register chamado com:', { name, username, email, password })
+      const response = await userService.register(name, username, email, password)
+      console.log('📥 UserContext - Resposta do userService:', response)
+      
+      if (response.success) {
+        console.log('✅ UserContext: Registro bem-sucedido, fazendo login...')
+        // Se o registro foi bem sucedido, faz login automaticamente
+        await login(email, password)
+      } else {
+        console.log('❌ UserContext: Registro falhou:', response.message)
+        dispatch({ 
+          type: 'REGISTER_FAILURE', 
+          payload: response.message || 'Falha no registro' 
+        })
+      }
+    } catch (error) {
+      console.error('💥 UserContext: Erro no register:', error)
+      dispatch({ 
+        type: 'REGISTER_FAILURE', 
+        payload: error instanceof Error ? error.message : 'Falha no registro' 
       })
     }
   }
@@ -125,7 +159,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (!state.user) return
     
     try {
-      const response = await userService.updateProfile(state.user.id, userData)
+      const response = await userService.updateProfile(userData)
       
       if (response.success) {
         dispatch({ type: 'UPDATE_USER', payload: userData })
@@ -138,32 +172,6 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }
 
-  const signup = async (userData: { username: string; email: string; password: string; displayName: string }): Promise<void> => {
-    dispatch({ type: 'LOGIN_START' })
-    
-    try {
-      const response = await userService.signup(userData)
-      
-      if (response.success) {
-        // Store token and user in localStorage for persistence
-        localStorage.setItem('rixa_token', response.data.token)
-        localStorage.setItem('rixa_user', JSON.stringify(response.data.user))
-        
-        dispatch({ type: 'LOGIN_SUCCESS', payload: response.data.user })
-      } else {
-        dispatch({ 
-          type: 'LOGIN_FAILURE', 
-          payload: response.message || 'Falha no registro' 
-        })
-      }
-    } catch (error) {
-      dispatch({ 
-        type: 'LOGIN_FAILURE', 
-        payload: error instanceof Error ? error.message : 'Falha no registro' 
-      })
-    }
-  }
-
   const clearError = (): void => {
     dispatch({ type: 'CLEAR_ERROR' })
   }
@@ -173,10 +181,10 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const storedUser = localStorage.getItem('rixa_user')
     if (storedUser) {
       try {
-        const user = JSON.parse(storedUser)
-        dispatch({ type: 'LOGIN_SUCCESS', payload: user })
-      } catch (error) {
-        localStorage.removeItem('rixa_user')
+      const user = JSON.parse(storedUser)
+      dispatch({ type: 'LOGIN_SUCCESS', payload: user })
+      } catch {
+      localStorage.removeItem('rixa_user')
       }
     }
   }, [])
@@ -184,7 +192,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const contextValue: UserContextType = {
     ...state,
     login,
-    signup,
+    register, 
     logout,
     updateUser,
     clearError,
@@ -197,7 +205,6 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
   )
 }
 
-// Custom hook to use the user context
 export const useUser = (): UserContextType => {
   const context = useContext(UserContext)
   if (context === undefined) {

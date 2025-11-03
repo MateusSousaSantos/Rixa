@@ -1,378 +1,393 @@
 import type { User } from '../types/user'
-import { simulateDelay, type ApiResponse } from './api'
+import { 
+  API_BASE_URL, 
+  type ApiResponse, 
+  handleApiError, 
+  handleHttpError,
+  createSuccessResponse,
+  createErrorResponse
+} from './api'
+import { fetchWithAuth } from '../utils/authInterceptor'
 
-// Mock user database
-const mockUsers: User[] = [
-  {
-    id: '1',
-    username: 'alice_dev',
-    email: 'alice@example.com',
-    displayName: 'Alice Johnson',
-    avatar: '',
-    bio: 'Desenvolvedora full-stack apaixonada por ética em IA e código limpo.',
-    createdAt: '2023-01-15T10:30:00Z',
-  },
-  {
-    id: '2',
-    username: 'bob_policy',
-    email: 'bob@example.com',
-    displayName: 'Bob Smith',
-    avatar: '',
-    bio: 'Pesquisador de políticas interessado em regulamentação tecnológica.',
-    createdAt: '2023-02-20T14:45:00Z',
-  },
-  {
-    id: '3',
-    username: 'charlie_pm',
-    email: 'charlie@example.com',
-    displayName: 'Charlie Wilson',
-    avatar: '',
-    bio: 'Product Manager na TechCorp. Amo organizar eventos em equipe!',
-    createdAt: '2023-03-10T09:15:00Z',
-  },
-  {
-    id: '4',
-    username: 'diana_designer',
-    email: 'diana@example.com',
-    displayName: 'Diana Costa',
-    avatar: '',
-    bio: 'UX/UI Designer focada em acessibilidade e experiências inclusivas.',
-    createdAt: '2023-04-05T16:20:00Z',
-  },
-  {
-    id: '5',
-    username: 'eduardo_data',
-    email: 'eduardo@example.com',
-    displayName: 'Eduardo Silva',
-    avatar: '',
-    bio: 'Cientista de dados explorando machine learning e análise preditiva.',
-    createdAt: '2023-05-12T11:35:00Z',
-  },
-  {
-    id: '6',
-    username: 'fernanda_security',
-    email: 'fernanda@example.com',
-    displayName: 'Fernanda Santos',
-    avatar: '',
-    bio: 'Especialista em cybersecurity e proteção de dados pessoais.',
-    createdAt: '2023-06-18T13:40:00Z',
-  },
-  {
-    id: '7',
-    username: 'gabriel_startup',
-    email: 'gabriel@example.com',
-    displayName: 'Gabriel Lima',
-    avatar: '',
-    bio: 'Empreendedor tech interessado em inovação e sustentabilidade.',
-    createdAt: '2023-07-25T08:15:00Z',
-  }
-]
-
-// Current session - simulate logged in user
-let currentUser: User | null = null
+// Configuração da API do seu backend Java
 
 export const login = async (email: string, password: string): Promise<ApiResponse<{ user: User, token: string }>> => {
-  await simulateDelay(800) // Simulate network request
-  
-  // Mock authentication - any email/password works for demo
-  // In real implementation, password would be validated
-  console.log('Tentativa de login para:', email, 'com tamanho da senha:', password.length)
-  
-  const user = mockUsers.find(u => u.email === email) || {
-    id: Date.now().toString(),
-    username: email.split('@')[0],
-    email,
-    displayName: email.split('@')[0].charAt(0).toUpperCase() + email.split('@')[0].slice(1),
-    avatar: '',
-    bio: 'Bem-vindo ao Rixa!',
-    createdAt: new Date().toISOString(),
-  }
-  
-  // Add to mock users if new
-  if (!mockUsers.find(u => u.email === email)) {
-    mockUsers.push(user)
-  }
-  
-  currentUser = user
-  
-  return {
-    data: {
-      user,
-      token: `mock_token_${user.id}_${Date.now()}`
-    },
-    success: true,
-    message: 'Login realizado com sucesso'
+  try {
+    const response = await fetchWithAuth(`${API_BASE_URL}/login`, {
+      method: 'POST',
+      headers: { 
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ 
+        email, 
+        senha: password
+      })
+    });
+
+    if (!response.ok) {
+      throw handleHttpError(response);
+    }
+
+    const data = await response.json();
+    
+    if (data.success) {
+      // Mapear do formato Java para formato React
+      return createSuccessResponse({
+        user: {
+          id: data.user.id.toString(),      // Converter number para string
+          username: data.user.username,
+          email: data.user.email,
+          nome: data.user.nome,      // Mapear 'nome' para 'displayName'
+          avatar: data.user.avatar || '',
+          bios: data.user.bios || data.user.bio || 'Usuário do Rixa',           // Valor padrão
+          followerCount: data.user.followerCount || 0,
+          followingCount: data.user.followingCount || 0,
+        },
+        token: data.token
+      }, data.message);
+    } else {
+      return createErrorResponse(data.message || 'Erro no login');
+    }
+  } catch (error) {
+    console.error('Erro no login:', error);
+    return createErrorResponse(handleApiError(error, 'Erro de conexão com o servidor'));
   }
 }
 
 export const logout = async (): Promise<ApiResponse<boolean>> => {
-  await simulateDelay(200)
-  currentUser = null
-  
-  return {
-    data: true,
-    success: true,
-    message: 'Logout realizado com sucesso'
+  try {
+    await fetchWithAuth(`${API_BASE_URL}/logout`, {
+      method: 'POST',
+      headers: { 
+        'Content-Type': 'application/json',
+      }
+    });
+
+    // Mesmo se der erro no servidor, faz logout local
+    return createSuccessResponse(true, 'Logout realizado com sucesso');
+  } catch (error) {
+    // Em caso de erro de conexão, ainda faz logout local
+    console.error('Erro no logout:', error);
+    return createSuccessResponse(true, 'Logout realizado (offline)');
   }
 }
 
+export const updateProfile = async (profileData: Partial<User>): Promise<ApiResponse<User>> => {
+  try {
+    const getCurrentUser = localStorage.getItem('rixa_user');
+    if (!getCurrentUser) {
+      return createErrorResponse('Usuário não autenticado');
+    }
+    // Mapear do formato React para formato Java
+    const javaUserData = {
+      username: profileData.username,
+      nome: profileData.nome,
+      bios: profileData.bios,  
+    };
+    console.log('Dados enviados para atualização:', javaUserData);
+
+    const response = await fetchWithAuth(`${API_BASE_URL}/profile`, {
+      method: 'PUT',
+      headers: { 
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        username: javaUserData.username,
+        nome: javaUserData.nome,
+        bios: javaUserData.bios,
+      })
+    });
+
+    if (!response.ok) {
+      throw handleHttpError(response);
+    }
+
+    const data = await response.json();
+    
+    if (data.success) {
+      const userResponse = await getProfile();
+      if (userResponse.success && userResponse.data) {
+        return createSuccessResponse(userResponse.data, 'Perfil atualizado com sucesso');
+      } else {
+        return createErrorResponse('Falha ao recuperar dados atualizados do usuário');
+      }
+    } else {
+      return createErrorResponse('Falha ao atualizar perfil');
+    }
+  } catch (error) {
+    console.error('Erro ao atualizar perfil:', error);
+    return createErrorResponse(handleApiError(error, 'Erro de conexão'));
+  }
+}
+
+export const getProfile = async (): Promise<ApiResponse<User | null>> => {
+  try {
+    const response = await fetchWithAuth(`${API_BASE_URL}/profile`, {
+      method: 'GET',
+      headers: { 
+        'Content-Type': 'application/json',
+      }
+    });
+    
+    if (!response.ok) {
+      throw handleHttpError(response);
+    }
+
+    const user = await response.json();
+    
+    if (user && user.id) {
+      return createSuccessResponse({
+        id: user.id.toString(),
+        username: user.username,
+        email: user.email,
+        nome: user.nome,
+        avatar: user.avatar || '',
+        bios: user.bios || user.bio || 'Usuário do Rixa',
+        followerCount: user.followerCount || 0,
+        followingCount: user.followingCount || 0,
+      });
+    } else {
+      return createSuccessResponse(null, 'Usuário não encontrado');
+    }
+  } catch (error) {
+    console.error('Erro ao buscar usuário:', error);
+    return createErrorResponse(handleApiError(error, 'Erro de conexão'), null);
+  }
+}
+
+// Manter funções mock para outras funcionalidades por enquanto
 export const getCurrentUser = async (): Promise<ApiResponse<User | null>> => {
-  await simulateDelay(100)
-  
-  return {
-    data: currentUser,
-    success: true
-  }
-}
-
-export const updateProfile = async (userId: string, profileData: Partial<User>): Promise<ApiResponse<User>> => {
-  await simulateDelay(400)
-  
-  const userIndex = mockUsers.findIndex(u => u.id === userId)
-  if (userIndex === -1) {
-    return {
-      data: null as any,
-      success: false,
-      message: 'Usuário não encontrado'
+  // Esta função será chamada pelo contexto na inicialização
+  const storedUser = localStorage.getItem('rixa_user');
+  if (storedUser) {
+    try {
+      const user = JSON.parse(storedUser);
+      return createSuccessResponse(user);
+    } catch (error) {
+      console.error('Erro ao recuperar usuário do localStorage:', error);
+      return createSuccessResponse(null);
     }
   }
-  
-  const updatedUser = { ...mockUsers[userIndex], ...profileData }
-  mockUsers[userIndex] = updatedUser
-  
-  if (currentUser && currentUser.id === userId) {
-    currentUser = updatedUser
-  }
-  
-  return {
-    data: updatedUser,
-    success: true,
-    message: 'Perfil atualizado com sucesso'
+  return createSuccessResponse(null);
+}
+
+export const getMostFollowedUsers = async (): Promise<ApiResponse<User[]>> => {
+  try {
+    const response = await fetchWithAuth(`${API_BASE_URL}/most-followed`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
+
+    if (!response.ok) {
+      throw handleHttpError(response);
+    }
+
+    const usersData = await response.json();
+
+    if (Array.isArray(usersData)) {
+      const formattedUsers = usersData.map(user => ({
+        id: user.id.toString(),
+        username: user.username,
+        email: user.email,
+        nome: user.nome,
+        avatar: user.avatar || '',
+        bios: user.bios || user.bio || 'Usuário do Rixa',
+        followerCount: user.followerCount || 0,
+        followingCount: user.followingCount || 0,
+      }));
+
+      return createSuccessResponse(formattedUsers);
+    } else {
+      return createSuccessResponse([]);
+    }
+  } catch (error) {
+    console.error('Erro ao buscar usuários mais seguidos:', error);
+    return createErrorResponse(handleApiError(error, 'Erro de conexão'), []);
   }
 }
 
 export const searchUsers = async (query: string): Promise<ApiResponse<User[]>> => {
-  await simulateDelay(300)
-  
-  const filteredUsers = mockUsers.filter(user => 
-    user.username.toLowerCase().includes(query.toLowerCase()) ||
-    user.displayName.toLowerCase().includes(query.toLowerCase()) ||
-    user.email.toLowerCase().includes(query.toLowerCase())
-  )
-  
-  return {
-    data: filteredUsers,
-    success: true
-  }
+  // Por enquanto retorna array vazio - pode implementar depois
+  console.log('Buscando usuários com query:', query);
+  return createSuccessResponse([]);
 }
 
-export const getUserById = async (userId: string): Promise<ApiResponse<User | null>> => {
-  await simulateDelay(200)
-  
-  const user = mockUsers.find(u => u.id === userId)
-  
-  return {
-    data: user || null,
-    success: !!user,
-    message: user ? undefined : 'Usuário não encontrado'
-  }
-}
-
-export const getRecommendedUsers = async (limit: number = 5): Promise<ApiResponse<User[]>> => {
-  await simulateDelay(300)
-  
-  // If no current user, return some default recommendations
-  if (!currentUser) {
-    const recommendations = mockUsers.slice(0, limit)
-    return {
-      data: recommendations,
-      success: true,
-      message: 'Usuários recomendados carregados'
-    }
-  }
-  
-  // Filter out the current user and return random recommendations
-  const availableUsers = mockUsers.filter(u => u.id !== currentUser!.id)
-  
-  // Shuffle and limit the results
-  const shuffled = availableUsers.sort(() => 0.5 - Math.random())
-  const recommendations = shuffled.slice(0, limit)
-  
-  return {
-    data: recommendations,
-    success: true,
-    message: 'Usuários recomendados carregados'
-  }
-}
-
-// Follow System Services
-const userFollows: Record<string, string[]> = {} // userId -> array of followedUserIds
-
-export const followUser = async (userId: string): Promise<ApiResponse<boolean>> => {
-  await simulateDelay(200)
-  
-  if (!currentUser) {
-    return {
-      data: false,
-      success: false,
-      message: 'Usuário não autenticado'
-    }
-  }
-  
-  const targetUser = mockUsers.find(u => u.id === userId)
-  if (!targetUser) {
-    return {
-      data: false,
-      success: false,
-      message: 'Usuário não encontrado'
-    }
-  }
-  
-  if (!userFollows[currentUser.id]) {
-    userFollows[currentUser.id] = []
-  }
-  
-  if (userFollows[currentUser.id].includes(userId)) {
-    return {
-      data: false,
-      success: false,
-      message: 'Usuário já está sendo seguido'
-    }
-  }
-  
-  userFollows[currentUser.id].push(userId)
-  
-  return {
-    data: true,
-    success: true,
-    message: 'Usuário seguido com sucesso'
-  }
-}
-
-export const unfollowUser = async (userId: string): Promise<ApiResponse<boolean>> => {
-  await simulateDelay(200)
-  
-  if (!currentUser) {
-    return {
-      data: false,
-      success: false,
-      message: 'Usuário não autenticado'
-    }
-  }
-  
-  if (!userFollows[currentUser.id]) {
-    userFollows[currentUser.id] = []
-  }
-  
-  const followIndex = userFollows[currentUser.id].indexOf(userId)
-  if (followIndex === -1) {
-    return {
-      data: false,
-      success: false,
-      message: 'Usuário não está sendo seguido'
-    }
-  }
-  
-  userFollows[currentUser.id].splice(followIndex, 1)
-  
-  return {
-    data: true,
-    success: true,
-    message: 'Usuário deixou de ser seguido'
-  }
-}
-
-export const getUserFollowers = async (userId: string): Promise<ApiResponse<User[]>> => {
-  await simulateDelay(250)
-  
-  const followers: User[] = []
-  
-  // Find all users who follow the given userId
-  for (const [followerId, followingList] of Object.entries(userFollows)) {
-    if (followingList.includes(userId)) {
-      const followerUser = mockUsers.find(u => u.id === followerId)
-      if (followerUser) {
-        followers.push(followerUser)
+export const getUserByUsername = async (username: string): Promise<ApiResponse<User>> => {
+  try {
+    const response = await fetchWithAuth(`${API_BASE_URL}/usuario/${username}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json'
       }
+    });
+
+    if (!response.ok) {
+      throw handleHttpError(response);
     }
-  }
-  
-  return {
-    data: followers,
-    success: true,
-    message: 'Seguidores carregados com sucesso'
+
+    const userData = await response.json();
+    console.log('Dados do usuário recebido:', userData);
+    if (userData && userData.id) {
+      return createSuccessResponse({
+        id: userData.id.toString(),
+        username: userData.username,
+        email: userData.email,
+        nome: userData.nome,
+        avatar: userData.avatar || '',
+        bios: userData.bios || userData.bio || 'Usuário do Rixa',
+        followerCount: userData.followerCount || 0,
+        followingCount: userData.followingCount || 0,
+      });
+    } else {
+      return createErrorResponse('Usuário não encontrado');
+    }
+  } catch (error) {
+    console.error('Erro ao buscar usuário por username:', error);
+    return createErrorResponse(handleApiError(error, 'Erro de conexão'));
   }
 }
 
-export const getUserFollowing = async (userId: string): Promise<ApiResponse<User[]>> => {
-  await simulateDelay(250)
-  
-  const followingIds = userFollows[userId] || []
-  const following = mockUsers.filter(user => followingIds.includes(user.id))
-  
-  return {
-    data: following,
-    success: true,
-    message: 'Usuários seguidos carregados com sucesso'
+export const getUserById = async (userId: string): Promise<ApiResponse<User>> => {
+  try {
+    const response = await fetchWithAuth(`${API_BASE_URL}/users/${userId}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
+
+    if (!response.ok) {
+      throw handleHttpError(response);
+    }
+
+    const userData = await response.json();
+
+    if (userData && userData.id) {
+      return createSuccessResponse({
+        id: userData.id.toString(),
+        username: userData.username,
+        email: userData.email,
+        nome: userData.nome,
+        avatar: userData.avatar || '',
+        bios: userData.bios || userData.bio || 'Usuário do Rixa',
+        followerCount: userData.followerCount || 0,
+        followingCount: userData.followingCount || 0,
+      });
+    } else {
+      return createErrorResponse('Usuário não encontrado');
+    }
+  } catch (error) {
+    console.error('Erro ao buscar usuário por ID:', error);
+    return createErrorResponse(handleApiError(error, 'Erro de conexão'));
   }
 }
 
-export const isFollowingUser = async (userId: string): Promise<ApiResponse<boolean>> => {
-  await simulateDelay(100)
-  
-  if (!currentUser) {
-    return {
-      data: false,
-      success: true
+export const followUser = async (username: string): Promise<ApiResponse<{ success: boolean }>> => {
+  try {
+    const segundoUsernameNoArroba = username.startsWith('@') ? username.slice(1) : username;
+    console.log('Seguindo usuário:', segundoUsernameNoArroba);
+    const response = await fetchWithAuth(`${API_BASE_URL}/seguir`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        seguindoUsername: segundoUsernameNoArroba.trim()
+      }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      return createErrorResponse(data.message || 'Falha ao seguir usuário');
     }
-  }
-  
-  const isFollowing = userFollows[currentUser.id]?.includes(userId) || false
-  
-  return {
-    data: isFollowing,
-    success: true
+
+    return createSuccessResponse(data, 'Usuário seguido com sucesso');
+  } catch (error) {
+    console.error('Erro ao seguir usuário:', error);
+    return createErrorResponse(handleApiError(error, 'Erro de conexão'));
   }
 }
 
-// User Registration Services
-export const signup = async (userData: {
-  username: string
-  email: string
-  password: string
-  displayName: string
-}): Promise<ApiResponse<{ user: User; token: string }>> => {
-  await simulateDelay(600)
-  
-  // Check if user already exists
-  const existingUser = mockUsers.find(u => u.email === userData.email || u.username === userData.username)
-  if (existingUser) {
-    return {
-      data: null as any,
-      success: false,
-      message: 'Email ou nome de usuário já existe'
+export const unfollowUser = async (username: string): Promise<ApiResponse<{ success: boolean }>> => {
+  try {
+    const usernameSemArroba = username.startsWith('@') ? username.slice(1) : username;
+    console.log('Deixando de seguir usuário:', usernameSemArroba);
+    
+    const response = await fetchWithAuth(`${API_BASE_URL}/seguir`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        seguindoUsername: usernameSemArroba.trim()
+      }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      return createErrorResponse(data.message || 'Falha ao deixar de seguir usuário');
     }
+
+    return createSuccessResponse(data, 'Usuário deixado de seguir com sucesso');
+  } catch (error) {
+    console.error('Erro ao deixar de seguir usuário:', error);
+    return createErrorResponse(handleApiError(error, 'Erro de conexão'));
   }
-  
-  const newUser: User = {
-    id: Date.now().toString(),
-    username: userData.username,
-    email: userData.email,
-    displayName: userData.displayName,
-    avatar: '',
-    bio: 'Novo usuário no Rixa!',
-    createdAt: new Date().toISOString(),
+}
+
+export const isFollowingUser = async (username: string): Promise<ApiResponse<{ isFollowing: boolean }>> => {
+  try {
+    const segundoUsernameNoArroba = username.startsWith('@') ? username.slice(1) : username;
+    
+    const response = await fetchWithAuth(`${API_BASE_URL}/seguir/is-following/${segundoUsernameNoArroba.trim()}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      throw handleHttpError(response);
+    }
+
+    const data = await response.json();
+    
+    return createSuccessResponse({ isFollowing: data.isFollowing || false });
+  } catch (error) {
+    console.error('Erro ao verificar se está seguindo usuário:', error);
+    return createErrorResponse(handleApiError(error, 'Erro de conexão'), { isFollowing: false });
   }
-  
-  mockUsers.push(newUser)
-  currentUser = newUser
-  
-  return {
-    data: {
-      user: newUser,
-      token: `mock_token_${newUser.id}_${Date.now()}`
-    },
-    success: true,
-    message: 'Conta criada com sucesso'
+}
+
+export const register = async (name: string, username: string, email: string, password: string): Promise<ApiResponse<{ success: boolean }>> => {
+  try {
+    const response = await fetchWithAuth(`${API_BASE_URL}/usuario`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        avatar: '',
+        nome: name,
+        username: username, 
+        email: email,
+        senha: password
+      }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      return createErrorResponse(data.message || 'Falha no registro');
+    }
+
+    return createSuccessResponse(data, 'Registro realizado com sucesso');
+  } catch (error) {
+    console.error('💥 userService - Erro na requisição:', error);
+    return createErrorResponse(handleApiError(error, 'Erro de conexão'));
   }
 }

@@ -2,10 +2,11 @@ export interface User {
   id: string
   username: string
   email: string
-  displayName: string
+  nome: string
   avatar?: string
-  bio?: string
-  createdAt: string
+  bios?: string
+  followerCount?: number
+  followingCount?: number
 }
 
 export interface AuthState {

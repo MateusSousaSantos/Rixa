@@ -17,13 +17,18 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({ userDetails, o
 
   useEffect(() => {
     const fetchUser = async () => {
+      if (!userDetails.userId) {
+        setError('ID de usuário não fornecido')
+        setLoading(false)
+        return
+      }
+
       try {
         setLoading(true)
         setError(null)
         
-        // Use the userId from userDetails if available, otherwise fallback to first user for demo
-        const userId = userDetails.userId || '1'
-        const response = await getUserById(userId)
+        // Fetch specific user by ID (not current user)
+        const response = await getUserById(userDetails.userId)
         
         if (response.success && response.data) {
           setUser(response.data)
@@ -38,7 +43,7 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({ userDetails, o
     }
 
     fetchUser()
-  }, [userDetails.username, userDetails.userId])
+  }, [userDetails.userId])
 
   if (loading) {
     return (
@@ -94,7 +99,11 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({ userDetails, o
           <span>Voltar</span>
         </button>
       )}
-      <UserProfile profileUser={user} />
+      <UserProfile 
+        profileUser={user} 
+        isOwnProfile={false}
+        onUserUpdate={async () => {}} // Other users can't be updated
+      />
     </div>
   )
 }

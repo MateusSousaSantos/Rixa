@@ -11,7 +11,7 @@ export const MobilePost: React.FC<MobilePost> = ({}) => {
   const { user } = useAuth();
   const [isCreatePostModalOpen, setIsCreatePostModalOpen] = useState(false);
   const [postContent, setPostContent] = useState("");
-  const [postType, setPostType] = useState<"normal" | "debate" | "poll">(
+  const [postType, setPostType] = useState<"normal" | "debate">(
     "normal"
   );
 
@@ -60,11 +60,11 @@ export const MobilePost: React.FC<MobilePost> = ({}) => {
           {/* User Info */}
           <div className="flex items-center gap-3 mb-4">
             <div className="w-12 h-12 bg-rixa-blue rounded-full flex items-center justify-center text-white font-semibold">
-              {user?.displayName?.charAt(0).toUpperCase() || "U"}
+              {user?.nome?.charAt(0).toUpperCase() || "U"}
             </div>
             <div>
               <p className="font-semibold text-rixa-cream">
-                {user?.displayName || "Usuário"}
+                {user?.nome || "Usuário"}
               </p>
               <p className="text-sm text-rixa-cream/60">
                 @{user?.username || "usuario"}
@@ -93,16 +93,6 @@ export const MobilePost: React.FC<MobilePost> = ({}) => {
               }`}
             >
               Debate
-            </button>
-            <button
-              onClick={() => setPostType("poll")}
-              className={`px-4 py-2 rounded-lg font-semibold transition-colors ${
-                postType === "poll"
-                  ? "bg-rixa-blue text-rixa-cream"
-                  : "bg-rixa-blue/20 text-rixa-blue hover:bg-rixa-blue/30"
-              }`}
-            >
-              Enquete
             </button>
           </div>
 
@@ -151,24 +141,6 @@ export const MobilePost: React.FC<MobilePost> = ({}) => {
                   className="p-3 bg-rixa-dark-shadow border border-rixa-blue/20 rounded-lg text-rixa-cream placeholder-rixa-cream/50 focus:outline-none focus:border-rixa-blue/50"
                 />
               </div>
-            </div>
-          )}
-
-          {postType === "poll" && (
-            <div className="mb-6 space-y-3">
-              <input
-                type="text"
-                placeholder="Opção 1"
-                className="w-full p-3 bg-rixa-dark-shadow border border-rixa-blue/20 rounded-lg text-rixa-cream placeholder-rixa-cream/50 focus:outline-none focus:border-rixa-blue/50"
-              />
-              <input
-                type="text"
-                placeholder="Opção 2"
-                className="w-full p-3 bg-rixa-dark-shadow border border-rixa-blue/20 rounded-lg text-rixa-cream placeholder-rixa-cream/50 focus:outline-none focus:border-rixa-blue/50"
-              />
-              <button className="text-rixa-blue hover:text-rixa-cream transition-colors text-sm">
-                + Adicionar opção
-              </button>
             </div>
           )}
 

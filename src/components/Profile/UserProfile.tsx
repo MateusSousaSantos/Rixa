@@ -1,31 +1,42 @@
 import React, { useState } from "react";
-import { useProfile, useAuth } from "../../hooks";
 import { FiCamera, FiEdit2, FiSave } from "react-icons/fi";
+import type { User } from "../../types/user";
 
 interface UserProfileProps {
-  profileUser?: any; // The user whose profile is being viewed
+  profileUser?: User; // The user whose profile is being viewed
+  isOwnProfile: boolean; // Whether this is the current user's profile
+  onUserUpdate: (updatedData: Partial<User>) => Promise<void>; // Function to handle profile updates
 }
 
-export const UserProfile: React.FC<UserProfileProps> = ({ profileUser }) => {
-  const { user: currentUser } = useAuth(); // Current logged-in user
-  const { updateProfile } = useProfile();
-
-  // Use profileUser if provided, otherwise use current user
-  const user = profileUser || currentUser;
+export const UserProfile: React.FC<UserProfileProps> = ({ 
+  profileUser, 
+  isOwnProfile, 
+  onUserUpdate 
+}) => {
+  // Use profileUser - it should always be provided now
+  const user = profileUser;
 
   // Only allow editing if viewing own profile
-  const canEdit = currentUser?.id === user?.id;
+  const canEdit = isOwnProfile;
 
   const [isEditing, setIsEditing] = useState(false);
   const [editData, setEditData] = useState({
-    displayName: user?.displayName || "",
-    bio: user?.bio || "",
+    nome: user?.nome || "",
+    bios: user?.bios || "",
   });
 
   const handleSave = async () => {
-    if (canEdit) {
-      await updateProfile(editData);
-      setIsEditing(false);
+    if (canEdit && user) {
+      try {
+        await onUserUpdate({
+          nome: editData.nome,
+          bios: editData.bios,
+        });
+        setIsEditing(false);
+      } catch (error) {
+        console.error('Error updating profile:', error);
+        // Show error message to user - could be enhanced with toast notifications
+      }
     }
   };
 
@@ -71,17 +82,17 @@ export const UserProfile: React.FC<UserProfileProps> = ({ profileUser }) => {
             )}
           </div>
 
-          <div className="ml-4 flex flex-col justify-between">
+          <div className="ml-4 flex flex-col justify-start space-y-4">
             {!isEditing || !canEdit ? (
               <h2 className="text-3xl font-bold text-rixa-cream">
-                {user.displayName || "Unnamed User"}
+                {user.nome || "Unnamed User"}
               </h2>
             ) : (
               <input
                 type="text"
-                value={editData.displayName}
+                value={editData.nome}
                 onChange={(e) =>
-                  setEditData({ ...editData, displayName: e.target.value })
+                  setEditData({ ...editData, nome: e.target.value })
                 }
                 className="text-2xl font-bold text-rixa-cream bg-transparent border-b border-rixa-blue focus:outline-none"
               />
@@ -89,7 +100,6 @@ export const UserProfile: React.FC<UserProfileProps> = ({ profileUser }) => {
             <h2 className="text-xl text-rixa-blue">
               @{user.username || "Unnamed User"}
             </h2>
-            <h2 className="text-xl text-rixa-blue font-bold">50.000 pontos</h2>
           </div>
         </div>
 
@@ -124,11 +134,11 @@ export const UserProfile: React.FC<UserProfileProps> = ({ profileUser }) => {
       {/* Stats Section - Fixed */}
       <div className="flex gap-x-5 flex-shrink-0">
         <div className="flex items-center gap-2 mb-4">
-          <h3 className="text-lg font-semibold text-rixa-cream mb-1">50</h3>
+          <h3 className="text-lg font-semibold text-rixa-cream mb-1">{user.followingCount || 0}</h3>
           <p className="text-rixa-cream/70">Seguindo</p>
         </div>
         <div className="flex items-center gap-2 mb-4">
-          <h3 className="text-lg font-semibold text-rixa-cream mb-1">500</h3>
+          <h3 className="text-lg font-semibold text-rixa-cream mb-1">{user.followerCount || 0}</h3>
           <p className="text-rixa-cream/70">Seguidores</p>
         </div>
       </div>
@@ -137,13 +147,13 @@ export const UserProfile: React.FC<UserProfileProps> = ({ profileUser }) => {
       <div className="h-32 flex-shrink-0 mb-4">
         {!isEditing || !canEdit ? (
           <p className="text-rixa-cream/70">
-            {user.bio || "No bio available."}
+            {user.bios || "No bio available."}
           </p>
         ) : (
           <textarea
-            value={editData.bio}
+            value={editData.bios}
             onChange={(e) =>
-              setEditData({ ...editData, bio: e.target.value })
+              setEditData({ ...editData, bios: e.target.value })
             }
             className="w-full h-full p-2 border border-rixa-blue rounded-md bg-rixa-blue/20 text-rixa-cream focus:outline-none focus:ring-2 focus:ring-rixa-blue resize-none"
           />
